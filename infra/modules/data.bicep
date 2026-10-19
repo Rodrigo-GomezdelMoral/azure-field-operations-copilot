@@ -29,7 +29,7 @@ var containers = [
   { name: 'audit', partitionKey: '/intervention_id', ttl: -1 }, { name: 'assets', partitionKey: '/asset_id', ttl: -1 }, { name: 'inventory', partitionKey: '/part_number', ttl: -1 }
 ]
 var vectorPolicy = { vectorEmbeddings: [{ path: '/embedding', dataType: 'float32', dimensions: 1536, distanceFunction: 'cosine' }] }
-var vectorIndexing = { automatic: true, indexingMode: 'consistent', vectorIndexes: [{ path: '/embedding', type: 'quantizedFlat' }], excludedPaths: [{ path: '/embedding/*' }] }
+var vectorIndexing = { automatic: true, indexingMode: 'consistent', includedPaths: [{ path: '/*' }], excludedPaths: [{ path: '/embedding/*' }], vectorIndexes: [{ path: '/embedding', type: 'quantizedFlat' }] }
 var memoryProperties = { vectorEmbeddingPolicy: vectorPolicy, indexingPolicy: vectorIndexing }
 var sqlGrants = [
   { principalId: apiPrincipalId, role: dataContributor, scope: '' }, { principalId: jobsPrincipalId, role: dataContributor, scope: '' }

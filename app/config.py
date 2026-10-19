@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     chat_deployment: str = "gpt-5-mini"
     small_chat_deployment: str = "gpt-5-nano"
     embedding_deployment: str = "text-embedding-3-small"
-    analyzer_id: str = "damage-triage-v1"
+    analyzer_id: str = "damageTriageV1"
     search_endpoint: str
     search_index: str = "manuals"
     cosmos_endpoint: str
