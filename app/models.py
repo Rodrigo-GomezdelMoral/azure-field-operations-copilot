@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-PART_NUMBER = r"^[A-Z]{2,4}-\d{3,5}$"
+PART_NUMBER = r"^[A-Z]{1,4}-\d{3,5}$"
 Status = Literal["running", "pending_approval", "pending_question", "completed", "closed", "failed"]
 RequestKind = Literal["function_approval", "user_question"]
 

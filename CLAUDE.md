@@ -58,8 +58,9 @@ Re-read this file at the start of every phase.
    both enforce it.
 6. **Minimal dependencies.** `agent-framework-foundry`, `agent-framework-orchestrations`,
    `agent-framework-azure-cosmos`, `agent-framework-azure-contentunderstanding` and
-   `agent-framework-a2a`, never the `agent-framework` metapackage; `fastmcp` for the inventory
-   server; `a2a-sdk` for the agent card and routes.
+   `agent-framework-a2a`, never the `agent-framework` metapackage; the official `mcp` SDK for the
+   inventory server (its `FastMCP` class; the third-party `fastmcp` package pulls `mcp` 2.x, which
+   the framework's MCP client cannot initialise against); `a2a-sdk` for the agent card and routes.
 7. **`targetScope = 'resourceGroup'`.** `rg-fopcopilot-prod-swc` exists; never create it.
 8. **English** everywhere. Nothing unfinished.
 
@@ -75,7 +76,7 @@ Re-read this file at the start of every phase.
 | Workflow runs | `await workflow.run(message=None, *, stream=, responses={request_id: ...}, checkpoint_id=, checkpoint_storage=)`; events are `WorkflowEvent` with `.type` (`request_info`, `executor_invoked`, `executor_completed`, …), `.request_id`, `.data`; an approval request is a `Content` with `type == "function_approval_request"`, answered with `content.to_function_approval_response(approved)` |
 | Checkpoints | `agent_framework_azure_cosmos.CosmosCheckpointStorage(container_client=, ...)`; the container partition key path is `/workflow_name` |
 | Vision | `agent_framework_azure_contentunderstanding.ContentUnderstandingContextProvider(endpoint=, credential=, analyzer_id=, max_wait=)`; the analyzer is created by `ops/analyzer.py` with `azure.ai.contentunderstanding` |
-| MCP | `agent_framework.MCPStreamableHTTPTool(name=, url=, load_tools=True, ...)` used as an async context manager and passed in `tools=`; `fastmcp.FastMCP` and `@mcp.tool()` on the server side |
+| MCP | `agent_framework.MCPStreamableHTTPTool(name=, url=, load_tools=True, ...)` used as an async context manager and passed in `tools=`; `mcp.server.fastmcp.FastMCP(name, instructions=, host=, port=)`, `@mcp.tool()` and `mcp.run(transport="streamable-http")` on the server side (`mcp==1.30.0`) |
 | A2A | `agent_framework.a2a.A2AExecutor(agent, stream=False)`; `a2a.types.AgentCard`, `AgentSkill`, `AgentCapabilities`, `AgentInterface`; `a2a.server.request_handlers.DefaultRequestHandler`; `a2a.server.tasks.InMemoryTaskStore`; `a2a.server.routes.agent_card_routes.create_agent_card_routes`, `a2a.server.routes.jsonrpc_routes.create_jsonrpc_routes` |
 | Foundry | `agent_framework.foundry.FoundryChatClient(project_endpoint=, model=<deployment>, credential=)`, `FoundryChatOptions`, `FoundryEvals(client=, evaluators=[...])` |
 | Embeddings | `agent_framework.openai.OpenAIEmbeddingClient(model=, credential=, base_url=)` |
