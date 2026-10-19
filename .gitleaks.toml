@@ -1,0 +1,31 @@
+title = "azure-field-operations-copilot"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "email-address"
+description = "An email address; the repository commits none"
+regex = '''[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'''
+[rules.allowlist]
+regexes = ['''@example\.(com|invalid)''', '''users\.noreply\.github\.com''']
+
+[[rules]]
+id = "guid"
+description = "A GUID; only the all-zero placeholder and the built-in role definition ids used by the templates are allowed"
+regex = '''[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'''
+[rules.allowlist]
+regexes = [
+  '''00000000-0000-0000-0000-00000000000[0-9]''',
+  '''ba92f5b4-2d11-453d-a403-e96b0029c9fe''',
+  '''2a2b9908-6ea1-4ae2-8e65-a410df84e7d1''',
+  '''53ca6127-db72-4b80-b1b0-d745d6d5456d''',
+  '''a97b65f3-24c7-4388-baec-2e87135dc908''',
+  '''5e0bd9bd-7b93-4f28-af87-19fc36ad61bd''',
+  '''7ca78c08-252a-4471-8644-bb5ff32d4ba0''',
+  '''8ebe5a00-799e-43f5-93ac-243d3dce84a7''',
+  '''1407120a-92aa-4202-b7e9-c0e197c71c8f''',
+  '''7f951dda-4ed3-4680-a7ca-43fe172d538d''',
+  '''3913510d-42f4-4e42-8a64-420c390055eb''',
+  '''d5a91429-5739-47e2-a06b-3470a27159e7''',
+]
