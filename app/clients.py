@@ -32,7 +32,7 @@ class Clients:
 
 
 def build_clients(settings: Settings) -> Clients:
-    credential = DefaultAzureCredential()
+    credential = DefaultAzureCredential(process_timeout=60)
     project = settings.foundry_project_endpoint
     events = (
         EventGridPublisherClient(settings.event_grid_topic_endpoint, credential)

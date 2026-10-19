@@ -41,6 +41,7 @@ class PendingRequest(BaseModel):
     tool: str | None = None
     arguments: dict[str, Any] = {}
     question: str | None = None
+    payload: dict[str, Any] = {}
     created_at: datetime = Field(default_factory=now)
 
 
@@ -69,6 +70,6 @@ class AuditEvent(BaseModel):
     agent: str
     tool: str
     arguments: dict[str, Any]
-    outcome: Literal["executed", "rejected", "requested"]
+    outcome: Literal["executed", "rejected", "requested", "approved", "denied", "answered"]
     actor: str
     at: datetime = Field(default_factory=now)

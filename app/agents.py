@@ -52,6 +52,7 @@ def build_agents(
             default_options=clients.options,
             context_providers=providers,
             middleware=middleware,
+            require_per_service_call_history_persistence=True,
         )
 
     inventory_tools: list[FunctionTool | MCPStreamableHTTPTool] = [inventory] if inventory else []
