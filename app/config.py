@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     api_audience: str
     api_app_role: str = "Copilot.Use"
     a2a_app_role: str = "Copilot.Diagnose"
+    a2a_public_url: str = "http://localhost:8010/"
     supervisor_role: str = "supervisor"
     require_auth: bool = True
     applicationinsights_connection_string: str | None = None

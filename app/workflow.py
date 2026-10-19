@@ -67,7 +67,7 @@ def pending_request(event: WorkflowEvent) -> PendingRequest | None:
     data, agent = event.data, str(event.source_executor_id or event.executor_id or "")
     if isinstance(data, Content) and data.type == "function_approval_request":
         call = getattr(data, "function_call", None)
-        arguments = getattr(call, "arguments", None) or {}
+        arguments = (call.parse_arguments() if call is not None else None) or {}
         tool = str(getattr(call, "name", "")) or None
         return PendingRequest(
             request_id=event.request_id,

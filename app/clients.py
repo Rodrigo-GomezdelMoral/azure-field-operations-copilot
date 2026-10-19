@@ -34,11 +34,8 @@ class Clients:
 def build_clients(settings: Settings) -> Clients:
     credential = DefaultAzureCredential(process_timeout=60)
     project = settings.foundry_project_endpoint
-    events = (
-        EventGridPublisherClient(settings.event_grid_topic_endpoint, credential)
-        if settings.event_grid_topic_endpoint
-        else None
-    )
+    topic = settings.event_grid_topic_endpoint
+    events = EventGridPublisherClient(topic, credential) if topic else None
     return Clients(
         credential=credential,
         chat=FoundryChatClient(project_endpoint=project, model=settings.chat_deployment, credential=credential),

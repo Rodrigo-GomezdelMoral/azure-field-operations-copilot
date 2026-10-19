@@ -25,7 +25,7 @@ Re-read this file at the start of every phase.
 
   ```
   ── PHASE n COMPLETE ──
-  Files: <n>/56   Python: <app>/1200 + <eval and tests>/700   Bicep: <n>/450   TS: <n>/700   Comments: <n>/25
+  Files: <n>/56   Python: <app>/1200 + <eval and tests>/950   Bicep: <n>/450   TS: <n>/700   Comments: <n>/25
   Verified: ruff ✓  mypy ✓  pytest ✓  budget ✓
   Commit with:
     git add <paths>
@@ -50,8 +50,10 @@ Re-read this file at the start of every phase.
    modules — needs more, and the README records the count); the specification's 1,200 lines of
    Python apply to the application and operations code (`app/`, `ops/`, `mcp_inventory/`,
    `a2a_server/`), whose per-module targets it lists, and the evaluation harness and tests have
-   their own ceiling of 700; ≤ 450 Bicep; ≤ 700 TypeScript; directory depth 3; functions ≤ 35
-   lines.
+   their own ceiling of 950 (set at 700 in phase 1; raised in phase 7 when the harness the
+   specification mandates — six local checks, the approval-answering driver, the judge, the
+   calibration agreement and the gate — measured 320 lines on its own, which that estimate had
+   not foreseen); ≤ 450 Bicep; ≤ 700 TypeScript; directory depth 3; functions ≤ 35 lines.
 4. **Comments.** No `#` comment may restate the code; fewer than 25 in the whole Python codebase.
    Type hints replace them.
 5. **No defensive clutter.** No bare `except Exception`; ruff rule `BLE001` and the budget test
@@ -77,10 +79,10 @@ Re-read this file at the start of every phase.
 | Checkpoints | `agent_framework_azure_cosmos.CosmosCheckpointStorage(container_client=, ...)`; the container partition key path is `/workflow_name` |
 | Vision | `agent_framework_azure_contentunderstanding.ContentUnderstandingContextProvider(endpoint=, credential=, analyzer_id=, max_wait=)`; the analyzer is created by `ops/analyzer.py` with `azure.ai.contentunderstanding` |
 | MCP | `agent_framework.MCPStreamableHTTPTool(name=, url=, load_tools=True, ...)` used as an async context manager and passed in `tools=`; `mcp.server.fastmcp.FastMCP(name, instructions=, host=, port=)`, `@mcp.tool()` and `mcp.run(transport="streamable-http")` on the server side (`mcp==1.30.0`) |
-| A2A | `agent_framework.a2a.A2AExecutor(agent, stream=False)`; `a2a.types.AgentCard`, `AgentSkill`, `AgentCapabilities`, `AgentInterface`; `a2a.server.request_handlers.DefaultRequestHandler`; `a2a.server.tasks.InMemoryTaskStore`; `a2a.server.routes.agent_card_routes.create_agent_card_routes`, `a2a.server.routes.jsonrpc_routes.create_jsonrpc_routes` |
+| A2A | `agent_framework.a2a.A2AExecutor(agent, stream=False)`; `a2a.types.AgentCard`, `AgentSkill`, `AgentCapabilities`, `AgentInterface` are protobuf messages in `a2a-sdk` 1.2.3 (keyword construction, repeated fields appended, `supported_interfaces=[AgentInterface(url=, protocol_binding="JSONRPC")]`); `a2a.server.request_handlers.DefaultRequestHandler(agent_executor=, task_store=, agent_card=)`; `a2a.server.tasks.InMemoryTaskStore`; `a2a.server.routes.agent_card_routes.create_agent_card_routes(card)`, `a2a.server.routes.jsonrpc_routes.create_jsonrpc_routes(handler, "/")` return Starlette routes |
 | Foundry | `agent_framework.foundry.FoundryChatClient(project_endpoint=, model=<deployment>, credential=)`, `FoundryChatOptions`, `FoundryEvals(client=, evaluators=[...])` |
 | Embeddings | `agent_framework.openai.OpenAIEmbeddingClient(model=, credential=, base_url=)` |
-| Evaluation | `agent_framework.evaluate_workflow(*, workflow=, queries=, expected_output=, evaluators=[...])` → results with `sub_results`; `LocalEvaluator`, `@evaluator`, `tool_called_check`, `tool_call_args_match`, `ExpectedToolCall`, `raise_for_status()` |
+| Evaluation | `agent_framework.LocalEvaluator(*checks).evaluate(items, eval_name=)` → `EvalResults` with `.items[*].scores`, `.per_evaluator`, `.raise_for_status()`; `EvalItem(conversation, tools=, expected_output=, expected_tool_calls=[ExpectedToolCall(name)])`; `CheckResult(passed, reason, check_name)`; `tool_call_args_match`; `FoundryEvals(client=, evaluators=[FoundryEvals.INTENT_RESOLUTION, .TASK_ADHERENCE, .TOOL_CALL_ACCURACY]).evaluate(items)`. `evaluate_workflow(workflow=, workflow_result=)` extracts per-agent items only from `AgentExecutor` completions whose data is an `AgentExecutorResponse`; the handoff workflow's `HandoffAgentExecutor` completes with a list of `AgentExecutorRequest`/`AgentResponseUpdate` and raises "No agent executor data found" (verified 2026-10-19), so `eval/run.py` builds the per-agent items from the `output` events (`AgentResponseUpdate` with `author_name`) and the approval responses (`executor_invoked` with a `Content`) and runs the same evaluators on them |
 | Visualisation | `agent_framework.WorkflowViz(workflow).to_mermaid()` |
 | Events | `azure.eventgrid.aio.EventGridPublisherClient(endpoint, credential)` |
 

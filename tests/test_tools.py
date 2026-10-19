@@ -9,38 +9,24 @@ from app.tools import EVIDENCE_END, EVIDENCE_START, FieldTools
 from mcp_inventory import server
 from tests.conftest import FAKE, FakeClients, FakeContainer, FakeSearch, context
 
-PASSAGE = {
-    "manual": "doe-pump-sourcebook",
-    "section_label": "Basic Pump Maintenance > Predictive Maintenance",
-    "content": "Vibration analysis...",
-}
-ASSET = {
-    "id": "P-101",
-    "asset_id": "P-101",
-    "family": "pump",
-    "equipment_model": "CP-350",
-    "location": "Bay 2",
-    "commissioned": "2019-03-15",
-}
-CASE = {
-    "fault": "P-101 (CP-350): high vibration",
-    "root_cause": "bearing wear",
-    "resolution": "Replaced bearing set",
-    "resolved_at": "2025-06-01",
-}
+PASSAGE = {"manual": "doe-pump-sourcebook", "section_label": "Basic Pump Maintenance > Predictive Maintenance"}
+PASSAGE |= {"content": "Vibration analysis..."}
+ASSET = {"id": "P-101", "asset_id": "P-101", "family": "pump", "equipment_model": "CP-350", "location": "Bay 2"}
+ASSET |= {"commissioned": "2019-03-15"}
+CASE = {"fault": "P-101 (CP-350): high vibration", "root_cause": "bearing wear", "resolved_at": "2025-06-01"}
+CASE |= {"resolution": "Replaced bearing set"}
+WRITES = ("upsert_item", "create_item", "replace_item", "patch_item", "delete_item")
 
 
-def tools(
-    search_rows: list[dict[str, Any]] | None = None, stock: int = 3
-) -> tuple[FieldTools, FakeClients, FakeSearch]:
+def tools(rows: list[dict[str, Any]] | None = None, stock: int = 3) -> tuple[FieldTools, FakeClients, FakeSearch]:
+    inventory = FakeContainer({"P-1010": {"id": "P-1010", "part_number": "P-1010", "stock": stock}})
     containers = {
         "assets": FakeContainer({"P-101": ASSET}),
         "memory": FakeContainer(rows=[CASE]),
-        "interventions": FakeContainer({"abc": {"id": "abc"}}),
-        "inventory": FakeContainer({"P-1010": {"id": "P-1010", "part_number": "P-1010", "stock": stock}}),
+        "inventory": inventory,
     }
-    search = FakeSearch(search_rows or [])
-    clients = FakeClients(containers, search)
+    search = FakeSearch(rows or [])
+    clients = FakeClients(containers | {"interventions": FakeContainer({"abc": {"id": "abc"}})}, search)
     return FieldTools(clients, Settings(_env_file=None, **FAKE)), clients, search
 
 
@@ -62,10 +48,7 @@ async def test_asset_history_reads_the_registry_and_the_resolved_cases() -> None
 
 async def test_write_tools_require_approval_and_touch_cosmos_only_through_the_intervention() -> None:
     field, clients, _ = tools(stock=3)
-    assert (
-        field.reserve_parts.approval_mode == "always_require"
-        and field.create_work_order.approval_mode == "always_require"
-    )
+    assert field.reserve_parts.approval_mode == "always_require" == field.create_work_order.approval_mode
     lines = [PartLine(part_number="P-1010", quantity=2)]
     ctx = context(intervention_id="abc")
     text = str(await field.reserve_parts.invoke(arguments={"lines": lines}, context=ctx, skip_parsing=True))
@@ -82,10 +65,7 @@ async def test_write_tools_require_approval_and_touch_cosmos_only_through_the_in
 
 async def test_inventory_server_exposes_read_only_tools() -> None:
     assert sorted(t.name for t in await server.mcp.list_tools()) == ["find_parts", "part_stock"]
-    source = inspect.getsource(server)
-    assert not any(
-        verb in source for verb in ("upsert_item", "create_item", "replace_item", "patch_item", "delete_item")
-    )
+    assert not any(verb in inspect.getsource(server) for verb in WRITES)
 
 
 @pytest.mark.parametrize("quantity", [0, -3])

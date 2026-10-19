@@ -15,17 +15,11 @@ from app.workflow import Runtime
 from tests.conftest import FAKE, TENANT, FakeClients, FakeContainer
 
 KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-PENDING = PendingRequest(
-    request_id="req-1", kind="function_approval", agent="WorkOrder", tool="create_work_order", payload={}
-)
+PENDING = PendingRequest(request_id="req-1", kind="function_approval", agent="WorkOrder", tool="create_work_order")
 OPEN = Intervention(id="int-1", technician_id="tech-1", asset_id="P-101", status="pending_approval", pending=PENDING)
-QUESTION = OPEN.model_copy(
-    update={
-        "id": "int-2",
-        "status": "pending_question",
-        "pending": PENDING.model_copy(update={"kind": "user_question", "tool": None}),
-    }
-)
+QUESTION = OPEN.model_copy(update={"id": "int-2", "status": "pending_question"})
+QUESTION.pending = PENDING.model_copy(update={"kind": "user_question", "tool": None})
+SUPERVISOR, TECHNICIAN = ["Copilot.Use", "supervisor"], ["Copilot.Use"]
 
 
 class JWKS:
@@ -34,14 +28,9 @@ class JWKS:
 
 
 def bearer(oid: str, roles: list[str]) -> dict[str, str]:
-    claims = {
-        "aud": FAKE["api_audience"],
-        "iss": f"{main.LOGIN}/{TENANT}/v2.0",
-        "oid": oid,
-        "roles": roles,
-        "exp": int(time.time()) + 60,
-    }
-    return {"Authorization": f"Bearer {jwt.encode(claims, KEY, algorithm='RS256')}"}
+    claims = {"aud": FAKE["api_audience"], "iss": f"{main.LOGIN}/{TENANT}/v2.0", "oid": oid, "roles": roles}
+    token = jwt.encode(claims | {"exp": int(time.time()) + 60}, KEY, algorithm="RS256")
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture
@@ -56,48 +45,31 @@ def client(settings: Settings) -> TestClient:
 def test_token_and_app_role_are_enforced(client: TestClient) -> None:
     assert client.get("/v1/interventions/int-1").status_code == 401
     assert client.get("/v1/interventions/int-1", headers=bearer("tech-1", [])).status_code == 403
-    response = client.get("/v1/interventions/int-1", headers=bearer("tech-1", ["Copilot.Use"]))
-    assert (
-        response.status_code == 200
-        and response.json()["status"] == "pending_approval"
-        and response.json()["audit"] == []
-    )
-    assert client.get("/v1/interventions/int-1", headers=bearer("someone-else", ["Copilot.Use"])).status_code == 403
+    response = client.get("/v1/interventions/int-1", headers=bearer("tech-1", TECHNICIAN))
+    assert response.status_code == 200 and response.json()["status"] == "pending_approval"
+    assert response.json()["audit"] == []
+    assert client.get("/v1/interventions/int-1", headers=bearer("someone-else", TECHNICIAN)).status_code == 403
     assert client.get("/healthz").status_code == 200
 
 
 def test_separation_of_duties_is_checked_before_any_checkpoint_is_loaded(settings: Settings) -> None:
-    supervisor_who_opened = {"oid": "tech-1", "roles": ["Copilot.Use", "supervisor"]}
     with pytest.raises(HTTPException) as refused:
-        main.authorise(settings, supervisor_who_opened, OPEN, PENDING)
+        main.authorise(settings, {"oid": "tech-1", "roles": SUPERVISOR}, OPEN, PENDING)
     assert refused.value.status_code == 403 and "may not approve its own" in refused.value.detail
     with pytest.raises(HTTPException) as not_supervisor:
-        main.authorise(settings, {"oid": "sup-1", "roles": ["Copilot.Use"]}, OPEN, PENDING)
+        main.authorise(settings, {"oid": "sup-1", "roles": TECHNICIAN}, OPEN, PENDING)
     assert not_supervisor.value.status_code == 403
-    main.authorise(settings, {"oid": "sup-1", "roles": ["Copilot.Use", "supervisor"]}, OPEN, PENDING)
+    main.authorise(settings, {"oid": "sup-1", "roles": SUPERVISOR}, OPEN, PENDING)
     question = cast(PendingRequest, QUESTION.pending)
     with pytest.raises(HTTPException):
-        main.authorise(settings, {"oid": "sup-1", "roles": ["Copilot.Use", "supervisor"]}, QUESTION, question)
-    main.authorise(settings, {"oid": "tech-1", "roles": ["Copilot.Use"]}, QUESTION, question)
+        main.authorise(settings, {"oid": "sup-1", "roles": SUPERVISOR}, QUESTION, question)
+    main.authorise(settings, {"oid": "tech-1", "roles": TECHNICIAN}, QUESTION, question)
 
 
 def test_responses_route_refuses_before_resuming(client: TestClient) -> None:
-    body = {"request_id": "req-1", "approved": True}
-    assert (
-        client.post(
-            "/v1/interventions/int-1/responses", json=body, headers=bearer("tech-1", ["Copilot.Use", "supervisor"])
-        ).status_code
-        == 403
-    )
-    stale = client.post(
-        "/v1/interventions/int-1/responses",
-        json={"request_id": "old", "approved": True},
-        headers=bearer("sup-1", ["Copilot.Use", "supervisor"]),
-    )
+    body, url = {"request_id": "req-1", "approved": True}, "/v1/interventions/int-1/responses"
+    assert client.post(url, json=body, headers=bearer("tech-1", SUPERVISOR)).status_code == 403
+    stale = client.post(url, json={"request_id": "old", "approved": True}, headers=bearer("sup-1", SUPERVISOR))
     assert stale.status_code == 409
-    assert (
-        client.post(
-            "/v1/interventions/missing/responses", json=body, headers=bearer("sup-1", ["Copilot.Use", "supervisor"])
-        ).status_code
-        == 404
-    )
+    missing = client.post("/v1/interventions/missing/responses", json=body, headers=bearer("sup-1", SUPERVISOR))
+    assert missing.status_code == 404

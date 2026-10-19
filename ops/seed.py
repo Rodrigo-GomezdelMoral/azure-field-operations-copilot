@@ -66,20 +66,11 @@ def cases_for(asset: Record, spec: Family, parts: list[Record], rng: random.Rand
     for k in range(1, 14):
         fault = rng.randrange(len(faults))
         resolved = f"2025-{rng.randint(1, 12):02d}-{rng.randint(1, 28):02d}"
-        case = {
-            "id": f"wo-{asset['asset_id']}-{k:02d}",
-            "asset_id": asset["asset_id"],
-            "equipment_model": asset["equipment_model"],
-        }
-        case |= {
-            "fault": f"{asset['asset_id']} ({asset['equipment_model']}): {faults[fault]}",
-            "root_cause": causes[fault],
-        }
-        case |= {
-            "resolution": f"Replaced {names[fault]} and verified operation",
-            "parts_used": [parts[fault]["part_number"]],
-        }
-        cases.append(case | {"resolved_at": resolved})
+        case = {"id": f"wo-{asset['asset_id']}-{k:02d}", "asset_id": asset["asset_id"], "resolved_at": resolved}
+        case |= {"equipment_model": asset["equipment_model"], "root_cause": causes[fault]}
+        case |= {"fault": f"{asset['asset_id']} ({asset['equipment_model']}): {faults[fault]}"}
+        resolution = {"resolution": f"Replaced {names[fault]} and verified operation"}
+        cases.append(case | resolution | {"parts_used": [parts[fault]["part_number"]]})
     return cases
 
 
@@ -110,15 +101,12 @@ async def upload_manuals(settings: Settings, credential: DefaultAzureCredential)
 
 
 async def embed_cases(settings: Settings, credential: DefaultAzureCredential, cases: list[Record]) -> None:
-    client = OpenAIEmbeddingClient(
-        model=settings.embedding_deployment, credential=credential, azure_endpoint=settings.foundry_account_endpoint
-    )
+    endpoint = settings.foundry_account_endpoint
+    client = OpenAIEmbeddingClient(model=settings.embedding_deployment, credential=credential, azure_endpoint=endpoint)
     for start in range(0, len(cases), EMBED_BATCH):
         batch = cases[start : start + EMBED_BATCH]
-        vectors = await client.get_embeddings(
-            [f"{c['fault']}. Root cause: {c['root_cause']}. {c['resolution']}" for c in batch]
-        )
-        for case, embedding in zip(batch, vectors, strict=True):
+        texts = [f"{c['fault']}. Root cause: {c['root_cause']}. {c['resolution']}" for c in batch]
+        for case, embedding in zip(batch, await client.get_embeddings(texts), strict=True):
             case["embedding"] = list(embedding.vector)
 
 

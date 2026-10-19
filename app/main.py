@@ -51,10 +51,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     storage = CosmosCheckpointStorage(
         container_client=clients.container("checkpoints"), allowed_checkpoint_types=CHECKPOINT_TYPES
     )
-    app.state.settings, app.state.jwks = (
-        settings,
-        jwt.PyJWKClient(f"{LOGIN}/{settings.entra_tenant_id}/discovery/v2.0/keys"),
-    )
+    app.state.settings = settings
+    app.state.jwks = jwt.PyJWKClient(f"{LOGIN}/{settings.entra_tenant_id}/discovery/v2.0/keys")
     app.state.runtime = Runtime(clients, settings, FieldTools(clients, settings), storage, inventory)
     yield
     if inventory is not None:
@@ -65,28 +63,29 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title="Industrial Field Operations Copilot", lifespan=lifespan)
 
 
-def principal(request: Request) -> dict[str, Any]:
-    settings: Settings = request.app.state.settings
-    if not settings.require_auth:
-        return {
-            "oid": request.headers.get("x-demo-user", "local"),
-            "roles": [settings.api_app_role, settings.supervisor_role],
-        }
-    token = request.headers.get("authorization", "")[len("Bearer ") :]
+def verify_token(settings: Settings, jwks: jwt.PyJWKClient, authorization: str, role: str) -> dict[str, Any]:
+    token = authorization[len("Bearer ") :]
     if not token:
         raise HTTPException(401, "a bearer token is required")
-    issuer, audiences = (
-        f"{LOGIN}/{settings.entra_tenant_id}/v2.0",
-        [settings.api_audience, settings.api_audience.removeprefix("api://")],
-    )
+    issuer = f"{LOGIN}/{settings.entra_tenant_id}/v2.0"
+    audiences = [settings.api_audience, settings.api_audience.removeprefix("api://")]
     try:
-        key = request.app.state.jwks.get_signing_key_from_jwt(token).key
+        key = jwks.get_signing_key_from_jwt(token).key
         claims: dict[str, Any] = jwt.decode(token, key, algorithms=["RS256"], audience=audiences, issuer=issuer)
     except jwt.PyJWTError as error:
         raise HTTPException(401, f"invalid token: {error}") from error
-    if settings.api_app_role not in claims.get("roles", []):
-        raise HTTPException(403, f"the {settings.api_app_role} app role is required")
+    if role not in claims.get("roles", []):
+        raise HTTPException(403, f"the {role} app role is required")
     return claims
+
+
+def principal(request: Request) -> dict[str, Any]:
+    settings: Settings = request.app.state.settings
+    if not settings.require_auth:
+        demo = request.headers.get("x-demo-user", "local")
+        return {"oid": demo, "roles": [settings.api_app_role, settings.supervisor_role]}
+    authorization = request.headers.get("authorization", "")
+    return verify_token(settings, request.app.state.jwks, authorization, settings.api_app_role)
 
 
 Claims = Annotated[dict[str, Any], Depends(principal)]
@@ -94,11 +93,9 @@ Claims = Annotated[dict[str, Any], Depends(principal)]
 
 def frame(event: WorkflowEvent) -> str:
     data = event.data
-    body: dict[str, Any] = {
-        "type": event.type,
-        "agent": (event.source_executor_id if event.type == "request_info" else None) or event.executor_id,
-        "request_id": event.request_id if event.type == "request_info" else None,
-    }
+    agent = (event.source_executor_id if event.type == "request_info" else None) or event.executor_id
+    request_id = event.request_id if event.type == "request_info" else None
+    body: dict[str, Any] = {"type": event.type, "agent": agent, "request_id": request_id}
     if isinstance(data, Content):
         body["data"] = data.to_dict()
     elif hasattr(data, "text"):
@@ -151,18 +148,10 @@ async def open_intervention(body: NewIntervention, request: Request, claims: Cla
     contents: list[Content] = [Content.from_text(body.description)]
     if body.image_base64 and body.image_media_type:
         contents.append(Content.from_data(data=base64.b64decode(body.image_base64), media_type=body.image_media_type))
-    events = run_events(
-        runtime,
-        create_workflow(runtime, intervention),
-        claims["oid"],
-        intervention.id,
-        message=Message("user", contents),
-    )
-    return StreamingResponse(
-        stream_run(request, intervention, events),
-        media_type="text/event-stream",
-        headers={"x-intervention-id": intervention.id},
-    )
+    workflow, message = create_workflow(runtime, intervention), Message("user", contents)
+    events = run_events(runtime, workflow, claims["oid"], intervention.id, message=message)
+    headers = {"x-intervention-id": intervention.id}
+    return StreamingResponse(stream_run(request, intervention, events), media_type="text/event-stream", headers=headers)
 
 
 @app.post("/v1/interventions/{intervention_id}/responses")
@@ -174,25 +163,16 @@ async def respond(intervention_id: str, body: RequestResponse, request: Request,
         raise HTTPException(409, "no such pending request on this intervention")
     authorise(runtime.settings, claims, intervention, pending)
     decision = ("approved" if body.approved else "denied") if pending.kind == "function_approval" else "answered"
-    record = AuditEvent(
-        intervention_id=intervention_id,
-        agent=pending.agent,
-        tool=pending.tool or "question",
-        arguments=pending.arguments,
-        outcome=decision,
-        actor=claims["oid"],
-    )
+    fields: dict[str, Any] = {"intervention_id": intervention_id, "agent": pending.agent, "actor": claims["oid"]}
+    record = AuditEvent(**fields, tool=pending.tool or "question", arguments=pending.arguments, outcome=decision)
     await runtime.clients.container("audit").create_item(record.model_dump(mode="json"))
     checkpoint = await runtime.storage.get_latest(workflow_name=intervention_id)
     if checkpoint is None:
         raise HTTPException(409, "no checkpoint to resume from")
+    workflow, responses = create_workflow(runtime, intervention), {pending.request_id: response_for(pending, body)}
+    checkpoint_id = checkpoint.checkpoint_id
     events = run_events(
-        runtime,
-        create_workflow(runtime, intervention),
-        claims["oid"],
-        intervention_id,
-        responses={pending.request_id: response_for(pending, body)},
-        checkpoint_id=checkpoint.checkpoint_id,
+        runtime, workflow, claims["oid"], intervention_id, responses=responses, checkpoint_id=checkpoint_id
     )
     return StreamingResponse(stream_run(request, intervention, events), media_type="text/event-stream")
 
@@ -216,19 +196,10 @@ async def close_intervention(intervention_id: str, body: Resolution, request: Re
         raise HTTPException(403, "only the technician who opened the intervention may close it")
     text = f"{intervention.asset_id} ({intervention.equipment_model}): {body.summary}"
     vector = list(next(iter(await runtime.clients.embeddings.get_embeddings([text]))).vector)
-    case: dict[str, Any] = {
-        "id": f"wo-{intervention.id}",
-        "asset_id": intervention.asset_id,
-        "equipment_model": intervention.equipment_model,
-        "fault": text,
-    }
-    case |= {
-        "root_cause": body.root_cause,
-        "resolution": body.summary,
-        "parts_used": body.parts_used,
-        "resolved_at": datetime.now(UTC).date().isoformat(),
-        "embedding": vector,
-    }
+    case: dict[str, Any] = {"id": f"wo-{intervention.id}", "asset_id": intervention.asset_id, "fault": text}
+    case |= {"equipment_model": intervention.equipment_model, "root_cause": body.root_cause, "embedding": vector}
+    case |= {"resolution": body.summary, "parts_used": body.parts_used}
+    case |= {"resolved_at": datetime.now(UTC).date().isoformat()}
     await runtime.clients.container("memory").upsert_item(case)
     closed = intervention.model_copy(update={"status": "closed", "resolution": body.summary, "pending": None})
     await runtime.clients.container("interventions").upsert_item(closed.model_dump(mode="json"))
@@ -238,9 +209,8 @@ async def close_intervention(intervention_id: str, body: Resolution, request: Re
 async def get_intervention(intervention_id: str, request: Request, claims: Claims) -> dict[str, Any]:
     runtime: Runtime = request.app.state.runtime
     intervention = await load(request, intervention_id)
-    if claims.get("oid") != intervention.technician_id and runtime.settings.supervisor_role not in claims.get(
-        "roles", []
-    ):
+    supervisor = runtime.settings.supervisor_role in claims.get("roles", [])
+    if claims.get("oid") != intervention.technician_id and not supervisor:
         raise HTTPException(403, "not your intervention")
     if intervention.pending is not None:
         pending_age.record((datetime.now(UTC) - intervention.pending.created_at).total_seconds() / 3600)
