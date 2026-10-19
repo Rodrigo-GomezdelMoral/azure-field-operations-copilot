@@ -21,7 +21,7 @@ class Fault(BaseModel):
 
 class PartLine(BaseModel):
     part_number: str = Field(pattern=PART_NUMBER)
-    quantity: int = Field(ge=1, le=50)
+    quantity: int = Field(ge=1)
 
 
 class WorkOrderDraft(BaseModel):

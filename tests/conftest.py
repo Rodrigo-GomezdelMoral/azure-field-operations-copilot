@@ -1,10 +1,13 @@
 from collections.abc import AsyncIterator
+from types import SimpleNamespace
 from typing import Any, cast
 
 import pytest
 from agent_framework import FunctionInvocationContext, FunctionTool
 from agent_framework.foundry import FoundryChatOptions
+from azure.core.credentials import AzureKeyCredential
 from azure.cosmos.aio import ContainerProxy
+from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
 from app.clients import Clients
 from app.config import Settings
@@ -34,9 +37,16 @@ class FakeContainer:
         self, items: dict[str, dict[str, Any]] | None = None, rows: list[dict[str, Any]] | None = None
     ) -> None:
         self.items, self.rows, self.patches = items or {}, rows or [], list[tuple[str, list[dict[str, Any]]]]()
+        self.created = list[dict[str, Any]]()
 
     async def read_item(self, item: str, partition_key: str) -> dict[str, Any]:
+        if item not in self.items:
+            raise CosmosResourceNotFoundError(message=f"{item} not found")  # type: ignore[no-untyped-call]
         return dict(self.items[item])
+
+    async def create_item(self, body: dict[str, Any]) -> dict[str, Any]:
+        self.created.append(body)
+        return body
 
     async def replace_item(self, item: dict[str, Any], body: dict[str, Any]) -> dict[str, Any]:
         self.items[body["id"]] = body
@@ -61,9 +71,20 @@ class FakeSearch:
         return stream(self.rows)
 
 
+class FakeEmbeddings:
+    async def get_embeddings(self, values: list[str]) -> list[Any]:
+        return [SimpleNamespace(vector=[0.1] * 1536) for _ in values]
+
+
 class FakeClients(Clients):
     def __init__(self, containers: dict[str, FakeContainer], search: FakeSearch | None = None) -> None:
         self.containers, self.search, self.options = containers, cast(Any, search), FoundryChatOptions()
+        self.embeddings, self.credential, self.chat, self.small_chat = (
+            cast(Any, FakeEmbeddings()),
+            cast(Any, AzureKeyCredential("test")),
+            cast(Any, None),
+            cast(Any, None),
+        )
 
     def container(self, name: str) -> ContainerProxy:
         return cast(ContainerProxy, self.containers[name])

@@ -88,7 +88,7 @@ async def test_inventory_server_exposes_read_only_tools() -> None:
     )
 
 
-@pytest.mark.parametrize("quantity", [0, 51])
+@pytest.mark.parametrize("quantity", [0, -3])
 def test_part_line_bounds(quantity: int) -> None:
     with pytest.raises(ValueError):
         PartLine(part_number="P-1010", quantity=quantity)
