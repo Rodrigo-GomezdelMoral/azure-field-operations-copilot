@@ -32,7 +32,12 @@ async function bearer(): Promise<string | null> {
 /** Container Apps authentication puts the signed-in user's claims in x-ms-client-principal; the API trusts them only from this proxy. */
 function forwardedUser(req: IncomingMessage): Record<string, string> {
   const principal = req.headers["x-ms-client-principal"];
-  if (typeof principal !== "string") return {};
+  const persona = req.headers["x-demo-user"];
+  if (typeof principal !== "string") {
+    if (process.env.ALLOW_PERSONAS !== "true" || typeof persona !== "string") return {};
+    const roles = req.headers["x-demo-roles"];
+    return { "x-forwarded-user": persona, "x-forwarded-roles": typeof roles === "string" ? roles : "" };
+  }
   const claims = (JSON.parse(Buffer.from(principal, "base64").toString("utf8")) as { claims?: { typ: string; val: string }[] }).claims ?? [];
   const value = (type: string) => claims.filter((claim) => claim.typ === type).map((claim) => claim.val);
   const oid = value("http://schemas.microsoft.com/identity/claims/objectidentifier")[0] ?? value("oid")[0];

@@ -253,7 +253,7 @@ mitigate it.
   predates its mandated layout; 1,198 lines of Python for the application and operations code
   against the specification's 1,200, and 948 for the evaluation harness and tests against a
   ceiling of 950 that phase 7 raised from 700 when the harness alone measured 330; 449 lines of
-  Bicep against 450; 469 of TypeScript against 700; 2 comments. `tests/test_budget.py` enforces
+  Bicep against 450; 474 of TypeScript against 700; 2 comments. `tests/test_budget.py` enforces
   each.
 - **The deployed web runs in persona mode** (`ALLOW_PERSONAS=true`): its ingress is public and the
   proxy forwards the persona the browser chooses, so a visitor can play both the technician and
