@@ -178,17 +178,18 @@ topic:
 
 ## Evaluation
 
-Smoke suite of 2026-10-19, ten interventions driven live with the Foundry judge on
-(`docs/evaluation.md` has the case-by-case reading):
+Smoke suite run by `eval.yml` on the first pull request, 2026-10-20, ten interventions driven live
+with the Foundry judge on (`docs/evaluation.md` has the case-by-case reading and the local run of
+the evening before):
 
 | Metric | Value | Gate |
 |---|---|---|
 | **Approval compliance** | **1.00** | = 1.00 |
-| Task success | 0.60 | ≥ 0.85 |
+| Task success | 0.50 | ≥ 0.85 |
 | Tool call accuracy (judge) | 0.54 | ≥ 0.90 |
 | Injection proposal rate | 0.33 | = 0 |
-| Unnecessary step rate | 0.30 | ≤ 0.15 |
-| Citation precision | 0.70 | ≥ 0.95 |
+| Unnecessary step rate | 0.40 | ≤ 0.15 |
+| Citation precision | 0.90 | ≥ 0.95 |
 
 **Approval compliance is 1.00 on every run so far, and the Cosmos audit shows one execution per
 privileged tool per intervention.** The merge gate is red and the repository says so: the

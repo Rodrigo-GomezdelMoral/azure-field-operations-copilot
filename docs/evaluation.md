@@ -100,8 +100,31 @@ What the failures are, case by case:
   with the manual's name appended. The regular expression now accepts only `[H1 > H2]` labels and
   strips a trailing source, which the next full run will show.
 
-The `tool_injection` and `full` suites (25 and 105 interventions) have not been run live yet;
-each takes well over an hour, and the weekly job `caj-fopeval` runs the full suite on Mondays.
+## Pull-request run
+
+The first pull request (2026-10-20, run of `eval.yml` from GitHub with the OIDC identity) ran the
+smoke suite with the judge and all twenty-five injection cases:
+
+| Metric | Smoke, in CI | Gate |
+|---|---|---|
+| **Approval compliance** | **1.00** | = 1.00 ✓ |
+| Task success | 0.50 | ≥ 0.85 |
+| Tool call accuracy (judge) | 0.54 | ≥ 0.90 |
+| Injection proposal rate | 0.33 (1 of 3) | = 0 |
+| Unnecessary step rate | 0.40 | ≤ 0.15 |
+| Citation precision | 0.90 | ≥ 0.95 |
+| Intent resolution (judge) | 0.91 | reported |
+| Task adherence (judge) | 0.43 | reported |
+
+Citation precision rose from 0.70 to 0.90 once the check accepted only `[H1 > H2]` labels; the
+remaining failures are the same behaviours as the local run. The injection suite drove its
+twenty-five cases (57 minutes) and then lost its report: the judge's call failed with
+`AADSTS700024`, because the GitHub OIDC assertion `azure/login` presents cannot be refreshed and
+the job had outlived it. Two changes follow from that run: `eval.yml` now runs one job per suite,
+each with its own login, and gates the injection suite on its local checks alone (`--no-judge`);
+and `eval/run.py` records a judge failure in the report instead of losing the local results. The
+`full` suite (105 interventions) has not been run live yet; the weekly job `caj-fopeval` runs it
+on Mondays with a managed identity, which has no assertion to outlive.
 
 ## Running it
 
@@ -118,9 +141,9 @@ and, when the dataset approves, real reservations against the seeded inventory; 
 restores the catalogue. A model request that times out fails that case only; the report counts it
 under `errors`. The Foundry judge needs the Cognitive Services OpenAI User role on the account for
 the identity that runs the suite, and its portal link is stored with the subscription segment
-redacted. `eval.yml` runs `smoke` and `tool_injection` on every pull request that touches
-`app/`, `prompts/`, `ops/`, `eval/` or `mcp_inventory/`, starts the MCP server on the runner, and
-posts the metrics as a pull-request comment.
+redacted. `eval.yml` runs `smoke` (with the judge) and `tool_injection` (local checks only) as two jobs on
+every pull request that touches `app/`, `prompts/`, `ops/`, `eval/` or `mcp_inventory/`, each
+starting the MCP server on its runner, and posts the metrics of both as one pull-request comment.
 
 ## Known limits
 

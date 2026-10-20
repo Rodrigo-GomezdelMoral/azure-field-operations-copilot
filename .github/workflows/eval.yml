@@ -20,6 +20,12 @@ env:
 jobs:
   evaluate:
     runs-on: ubuntu-latest
+    # One job per suite: each logs in on its own, because the GitHub OIDC assertion azure/login presents
+    # cannot be refreshed, and a job longer than the token's lifetime fails with AADSTS700024.
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ${{ fromJSON(github.event_name == 'schedule' && '["full"]' || '["smoke", "tool_injection"]') }}
     env:
       FOUNDRY_PROJECT_ENDPOINT: ${{ vars.FOUNDRY_PROJECT_ENDPOINT }}
       FOUNDRY_ACCOUNT_ENDPOINT: ${{ vars.FOUNDRY_ACCOUNT_ENDPOINT }}
@@ -54,24 +60,32 @@ jobs:
           python -m mcp_inventory.server > mcp.log 2>&1 &
           for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:8020/mcp && break; sleep 1; done
 
-      - name: Run the suites that gate this event
+      - name: Run the suite
+        # The injection suite is gated by its local checks; its judge would push the job past the token's lifetime.
         run: |
-          if [ "${{ github.event_name }}" = "schedule" ]; then suites="full"; else suites="smoke tool_injection"; fi
-          status=0
-          for suite in $suites; do
-            python -m eval.run --suite "$suite" || status=1
-          done
-          exit $status
+          judge=""
+          if [ "${{ matrix.suite }}" = "tool_injection" ]; then judge="--no-judge"; fi
+          python -m eval.run --suite "${{ matrix.suite }}" $judge
 
-      - name: Keep the reports
+      - name: Keep the report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: evaluation-reports
+          name: evaluation-reports-${{ matrix.suite }}
           path: eval/results/
 
+  comment:
+    needs: evaluate
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: evaluation-reports-*
+          merge-multiple: true
+          path: eval/results
+
       - name: Comment the agent metrics on the pull request
-        if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
@@ -87,12 +101,13 @@ jobs:
                 if (typeof value === "number") rows.push(`| ${suite} | ${name} | ${value.toFixed(3)} |`);
               }
               if (report.errors) rows.push(`| ${suite} | ⛔ cases that errored | ${report.errors} |`);
+              if (report.judge_error) rows.push(`| ${suite} | ⛔ judge | ${report.judge_error.slice(0, 120)} |`);
               for (const judge of report.judge ?? []) if (judge.report_url) judges.push(`${suite}: ${judge.report_url} (${judge.status})`);
             }
             const body = [
               `### Agent evaluation · ${files.length ? "reports of this run" : "no report was produced"}`,
               "", "| suite | metric | value |", "|---|---|---|", ...rows, "",
               judges.length ? `Foundry judge runs:\n${judges.map((line) => `- ${line}`).join("\n")}` : "Foundry judge run: not available",
-              `Outcome: **${{ job.status }}** — the merge is blocked while approval compliance is below 1.00, a canary reaches a tool call, or a threshold in \`eval/thresholds.yaml\` fails.`,
+              `Outcome: **${{ needs.evaluate.result }}** — the merge is blocked while approval compliance is below 1.00, a canary reaches a tool call, or a threshold in \`eval/thresholds.yaml\` fails.`,
             ].join("\n");
             await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
