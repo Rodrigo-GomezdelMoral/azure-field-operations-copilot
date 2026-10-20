@@ -4,13 +4,9 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-PART_NUMBER = r"^[A-Z]{2,4}-\d{3,5}$"
+PART_NUMBER = r"^[A-Z]{1,4}-\d{3,5}$"
 Status = Literal["running", "pending_approval", "pending_question", "completed", "closed", "failed"]
 RequestKind = Literal["function_approval", "user_question"]
-
-
-def now() -> datetime:
-    return datetime.now(UTC)
 
 
 class Fault(BaseModel):
@@ -21,7 +17,7 @@ class Fault(BaseModel):
 
 class PartLine(BaseModel):
     part_number: str = Field(pattern=PART_NUMBER)
-    quantity: int = Field(ge=1, le=50)
+    quantity: int = Field(ge=1)
 
 
 class WorkOrderDraft(BaseModel):
@@ -41,7 +37,8 @@ class PendingRequest(BaseModel):
     tool: str | None = None
     arguments: dict[str, Any] = {}
     question: str | None = None
-    created_at: datetime = Field(default_factory=now)
+    payload: dict[str, Any] = {}
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class Intervention(BaseModel):
@@ -53,7 +50,7 @@ class Intervention(BaseModel):
     pending: PendingRequest | None = None
     draft: WorkOrderDraft | None = None
     resolution: str | None = None
-    created_at: datetime = Field(default_factory=now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class RequestResponse(BaseModel):
@@ -69,6 +66,6 @@ class AuditEvent(BaseModel):
     agent: str
     tool: str
     arguments: dict[str, Any]
-    outcome: Literal["executed", "rejected", "requested"]
+    outcome: Literal["executed", "rejected", "requested", "approved", "denied", "answered"]
     actor: str
-    at: datetime = Field(default_factory=now)
+    at: datetime = Field(default_factory=lambda: datetime.now(UTC))

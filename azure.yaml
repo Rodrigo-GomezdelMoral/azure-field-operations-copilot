@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: azure-field-operations-copilot
+infra:
+  provider: bicep
+  path: infra
+  module: main
+services:
+  api:
+    project: .
+    language: python
+    host: containerapp
+    docker:
+      path: Dockerfile
+  mcp:
+    project: .
+    language: python
+    host: containerapp
+    docker:
+      path: Dockerfile
+  a2a:
+    project: .
+    language: python
+    host: containerapp
+    docker:
+      path: Dockerfile
+  web:
+    project: ./web
+    language: ts
+    host: containerapp
+    docker:
+      path: Dockerfile

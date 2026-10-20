@@ -13,3 +13,4 @@ data/manuals/
 data/*.pdf
 web/node_modules/
 web/dist/
+eval/results/

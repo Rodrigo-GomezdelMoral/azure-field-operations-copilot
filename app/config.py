@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     chat_deployment: str = "gpt-5-mini"
     small_chat_deployment: str = "gpt-5-nano"
     embedding_deployment: str = "text-embedding-3-small"
-    analyzer_id: str = "damage-triage-v1"
+    analyzer_id: str = "damageTriageV1"
     search_endpoint: str
     search_index: str = "manuals"
     cosmos_endpoint: str
@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     api_audience: str
     api_app_role: str = "Copilot.Use"
     a2a_app_role: str = "Copilot.Diagnose"
+    a2a_public_url: str = "http://localhost:8010/"
+    proxy_principal_id: str | None = None
     supervisor_role: str = "supervisor"
     require_auth: bool = True
     applicationinsights_connection_string: str | None = None

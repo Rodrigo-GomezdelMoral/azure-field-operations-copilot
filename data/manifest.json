@@ -1,0 +1,38 @@
+{
+  "licence": "Publications of the United States Department of Energy, Advanced Manufacturing Office: works of the United States Government, public domain",
+  "retrieved": "2026-10-19",
+  "documents": [
+    {
+      "id": "doe-pump-sourcebook",
+      "file": "pump.pdf",
+      "family": "pump",
+      "title": "Improving Pumping System Performance: A Sourcebook for Industry (2nd edition)",
+      "url": "https://www.energy.gov/sites/prod/files/2014/05/f16/pump.pdf",
+      "sha256": "e8975ae00a5d74bfb9f1512f8b2cd85a56359f61d8109bbb18bfdc6d3eb52eb4"
+    },
+    {
+      "id": "doe-fan-sourcebook",
+      "file": "fan_sourcebook.pdf",
+      "family": "fan",
+      "title": "Improving Fan System Performance: A Sourcebook for Industry",
+      "url": "https://www.energy.gov/sites/prod/files/2014/05/f16/fan_sourcebook.pdf",
+      "sha256": "a64f052a7caf3bf3a038a9b2da912a1335a2e46ebc7773044fdeeb0890bf8c28"
+    },
+    {
+      "id": "doe-motor-sourcebook",
+      "file": "amo_motors_sourcebook_web.pdf",
+      "family": "drive",
+      "title": "Improving Motor and Drive System Performance: A Sourcebook for Industry",
+      "url": "https://www.energy.gov/sites/prod/files/2014/04/f15/amo_motors_sourcebook_web.pdf",
+      "sha256": "d4b8cf6ee742935767d5c902f68b10c94de7b74a74cc8d34da1938b8c0948369"
+    },
+    {
+      "id": "doe-pump-lcc",
+      "file": "pumplcc_1001.pdf",
+      "family": "pump",
+      "title": "Pump Life Cycle Costs: A Guide to LCC Analysis for Pumping Systems",
+      "url": "https://www.energy.gov/sites/prod/files/2014/05/f16/pumplcc_1001.pdf",
+      "sha256": "048ceaf9d6c1f3e448cffe83ae8d9a1499b3af875fd932d3dfbda229c20c22dc"
+    }
+  ]
+}

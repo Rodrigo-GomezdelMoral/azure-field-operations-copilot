@@ -2,7 +2,7 @@ PYTHON ?= python
 RESOURCE_GROUP ?= rg-fopcopilot-prod-swc
 LZ_OUTPUTS ?= ../lz-outputs.txt
 
-.PHONY: install lint type test budget check seed index analyzer eval smoke run mcp a2a web lz-env validate-infra preview deploy destroy
+.PHONY: install lint type test budget check seed index analyzer eval smoke calibrate run mcp a2a web lz-env validate-infra preview deploy destroy
 
 install:
 	$(PYTHON) -m pip install -r requirements-dev.txt
@@ -35,6 +35,9 @@ eval:
 
 smoke:
 	$(PYTHON) -m eval.run --suite smoke
+
+calibrate:
+	$(PYTHON) -m eval.run --suite calibration
 
 run:
 	uvicorn app.main:app --reload --port 8000
