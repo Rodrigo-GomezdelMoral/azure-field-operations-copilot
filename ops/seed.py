@@ -47,7 +47,6 @@ FAMILIES: dict[str, Family] = {
         ["carrying idler", "belt splice kit", "gearbox oil", "drive sprocket"],
     ),
 }
-EMBED_BATCH = 64
 
 
 def parts_for(family: str, spec: Family, rng: random.Random) -> list[Record]:
@@ -103,8 +102,8 @@ async def upload_manuals(settings: Settings, credential: DefaultAzureCredential)
 async def embed_cases(settings: Settings, credential: DefaultAzureCredential, cases: list[Record]) -> None:
     endpoint = settings.foundry_account_endpoint
     client = OpenAIEmbeddingClient(model=settings.embedding_deployment, credential=credential, azure_endpoint=endpoint)
-    for start in range(0, len(cases), EMBED_BATCH):
-        batch = cases[start : start + EMBED_BATCH]
+    for start in range(0, len(cases), 64):
+        batch = cases[start : start + 64]
         texts = [f"{c['fault']}. Root cause: {c['root_cause']}. {c['resolution']}" for c in batch]
         for case, embedding in zip(batch, await client.get_embeddings(texts), strict=True):
             case["embedding"] = list(embedding.vector)

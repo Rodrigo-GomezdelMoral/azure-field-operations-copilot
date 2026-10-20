@@ -9,10 +9,6 @@ Status = Literal["running", "pending_approval", "pending_question", "completed",
 RequestKind = Literal["function_approval", "user_question"]
 
 
-def now() -> datetime:
-    return datetime.now(UTC)
-
-
 class Fault(BaseModel):
     asset_id: str = Field(min_length=3, max_length=32)
     description: str = Field(min_length=10, max_length=2000)
@@ -42,7 +38,7 @@ class PendingRequest(BaseModel):
     arguments: dict[str, Any] = {}
     question: str | None = None
     payload: dict[str, Any] = {}
-    created_at: datetime = Field(default_factory=now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class Intervention(BaseModel):
@@ -54,7 +50,7 @@ class Intervention(BaseModel):
     pending: PendingRequest | None = None
     draft: WorkOrderDraft | None = None
     resolution: str | None = None
-    created_at: datetime = Field(default_factory=now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class RequestResponse(BaseModel):
@@ -72,4 +68,4 @@ class AuditEvent(BaseModel):
     arguments: dict[str, Any]
     outcome: Literal["executed", "rejected", "requested", "approved", "denied", "answered"]
     actor: str
-    at: datetime = Field(default_factory=now)
+    at: datetime = Field(default_factory=lambda: datetime.now(UTC))

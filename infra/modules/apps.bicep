@@ -36,8 +36,8 @@ var apps = [
   { name: 'ca-fopmcp', service: 'mcp', identity: 2, image: apiImage, port: 8020, external: false, auth: false, command: ['python', '-m', 'mcp_inventory.server'], cpu: '0.25', memory: '0.5Gi', max: 2 }
   { name: 'ca-fopa2a', service: 'a2a', identity: 3, image: apiImage, port: 8010, external: true, auth: true, command: ['uvicorn', 'a2a_server.main:app', '--host', '0.0.0.0', '--port', '8010'], cpu: '0.5', memory: '1Gi', max: 2 }
 ]
-var web = [{ name: 'API_BASE_URL', value: 'https://ca-fopapi.${domain}' }, { name: 'API_AUDIENCE', value: audience }, { name: 'PORT', value: '8080' }]
-var envs = { api: concat(sharedEnv, [{ name: 'INVENTORY_MCP_URL', value: 'https://ca-fopmcp.internal.${domain}/mcp' }]), web: web, mcp: sharedEnv, a2a: sharedEnv }
+var web = [{ name: 'API_BASE_URL', value: 'https://ca-fopapi.${domain}' }, { name: 'API_AUDIENCE', value: audience }, { name: 'PORT', value: '8080' }, { name: 'ALLOW_PERSONAS', value: 'true' }]
+var envs = { api: concat(sharedEnv, [{ name: 'INVENTORY_MCP_URL', value: 'https://ca-fopmcp.internal.${domain}/mcp' }, { name: 'PROXY_PRINCIPAL_ID', value: identities[1].principalId }]), web: web, mcp: sharedEnv, a2a: sharedEnv }
 var jobs = [
   { name: 'caj-fopseed', trigger: 'Manual', command: ['python', '-m', 'ops.seed'] }, { name: 'caj-fopindexer', trigger: 'Manual', command: ['python', '-m', 'ops.index'] }
   { name: 'caj-fopeval', trigger: 'Schedule', command: ['python', '-m', 'eval.run', '--suite', 'full'] }

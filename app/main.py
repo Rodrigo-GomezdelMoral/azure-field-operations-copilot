@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from typing import Annotated, Any
 
 import jwt
-from agent_framework import Content, MCPStreamableHTTPTool, Message, WorkflowEvent
+from agent_framework import AgentResponseUpdate, Content, MCPStreamableHTTPTool, Message, WorkflowEvent
 from agent_framework.exceptions import ToolException
 from agent_framework_azure_cosmos import CosmosCheckpointStorage
 from azure.core.messaging import CloudEvent
@@ -85,7 +85,11 @@ def principal(request: Request) -> dict[str, Any]:
         demo = request.headers.get("x-demo-user", "local")
         return {"oid": demo, "roles": [settings.api_app_role, settings.supervisor_role]}
     authorization = request.headers.get("authorization", "")
-    return verify_token(settings, request.app.state.jwks, authorization, settings.api_app_role)
+    claims = verify_token(settings, request.app.state.jwks, authorization, settings.api_app_role)
+    forwarded = request.headers.get("x-forwarded-user")
+    if forwarded and claims.get("oid") == settings.proxy_principal_id:
+        return {"oid": forwarded, "roles": request.headers.get("x-forwarded-roles", "").split(",")}
+    return claims
 
 
 Claims = Annotated[dict[str, Any], Depends(principal)]
@@ -98,6 +102,12 @@ def frame(event: WorkflowEvent) -> str:
     body: dict[str, Any] = {"type": event.type, "agent": agent, "request_id": request_id}
     if isinstance(data, Content):
         body["data"] = data.to_dict()
+    elif isinstance(data, AgentResponseUpdate):
+        body["data"] = {
+            "role": str(data.role),
+            "author": data.author_name,
+            "contents": [c.to_dict() for c in data.contents],
+        }
     elif hasattr(data, "text"):
         body["data"] = {"text": data.text}
     elif data is not None and event.type != "superstep_completed":

@@ -6,9 +6,7 @@ from app.config import Settings
 
 SERVICE = "azure-field-operations-copilot"
 tracer = get_tracer(SERVICE)
-pending_age = get_meter(SERVICE).create_histogram(
-    "app.pending_request_age_hours", "h", "age of a pending request when read"
-)
+pending_age = get_meter(SERVICE).create_histogram("app.pending_request_age_hours", "h", "age of a pending request")
 
 
 def configure(settings: Settings) -> None:

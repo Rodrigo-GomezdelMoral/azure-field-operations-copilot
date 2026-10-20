@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Field Operations Copilot</title>
+    <style>
+      :root {
+        --bg: #f4f5f7; --panel: #ffffff; --ink: #1b2330; --muted: #5d6874; --line: #d7dde5;
+        --accent: #1d5fb5; --accent-ink: #ffffff; --ok: #1e7a4c; --warn: #b26a00; --warn-bg: #fff6e5; --stop: #8b2c2c; --stop-bg: #fbeeee;
+        --triage: #6b4fbb; --diagnostic: #1d5fb5; --parts: #b26a00; --workorder: #1e7a4c;
+        --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+      header { padding: 16px 16px 4px; }
+      header h1 { margin: 0; font-size: 20px; }
+      header p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+      main { display: grid; gap: 12px; padding: 8px 16px 48px; max-width: 1100px; }
+      section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+      h2 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+      form { display: grid; gap: 8px; }
+      input, textarea, select { font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: inherit; width: 100%; }
+      textarea { min-height: 88px; resize: vertical; }
+      button { font: inherit; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+      button.quiet { background: transparent; color: var(--accent); }
+      button.deny { border-color: var(--stop); background: var(--stop); }
+      button:disabled { opacity: 0.5; cursor: default; }
+      .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .photo { display: flex; gap: 10px; align-items: center; color: var(--muted); font-size: 14px; }
+      .photo img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+      .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+      .chips button { background: #eef3fb; color: var(--accent); border-color: #c9d8f2; font-size: 13px; padding: 6px 10px; text-align: left; }
+      .banner { padding: 8px 10px; background: var(--warn-bg); border: 1px solid #f1d9a6; border-radius: 8px; color: #6b4e0d; font-size: 13px; }
+      .error { padding: 8px 10px; background: var(--stop-bg); border: 1px solid #e3b5b5; border-radius: 8px; color: var(--stop); font-family: var(--mono); font-size: 13px; }
+      .status { color: var(--muted); font-size: 14px; }
+      .status b { color: var(--ink); }
+      ol.trace { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+      ol.trace li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; }
+      ol.trace li.active { border-color: var(--accent); background: #f1f6fd; }
+      ol.trace li.handoff { background: #faf8ff; }
+      .agent { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; align-self: start; padding-top: 2px; }
+      .agent.Triage { color: var(--triage); } .agent.Diagnostic { color: var(--diagnostic); } .agent.Parts { color: var(--parts); } .agent.WorkOrder { color: var(--workorder); }
+      .text { white-space: pre-wrap; overflow-wrap: anywhere; }
+      .call { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+      .call details { margin-top: 4px; font-family: system-ui, sans-serif; }
+      .call summary { cursor: pointer; color: var(--muted); }
+      .call pre { margin: 6px 0 0; padding: 8px; background: #f3f5f8; border-radius: 6px; font-size: 12px; white-space: pre-wrap; max-height: 240px; overflow: auto; }
+      .approval { border-left: 6px solid var(--warn); }
+      .approval h2 { color: var(--warn); }
+      .question { border-left: 6px solid var(--accent); }
+      .order { border-left: 6px solid var(--ok); }
+      .order h2 { color: var(--ok); }
+      dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; font-size: 14px; }
+      dt { color: var(--muted); } dd { margin: 0; overflow-wrap: anywhere; }
+      code { font-family: var(--mono); font-size: 13px; background: #eef1f5; padding: 1px 4px; border-radius: 4px; }
+      @media (min-width: 900px) {
+        main { grid-template-columns: minmax(0, 2fr) minmax(360px, 3fr); }
+        main > .wide { grid-column: 1 / -1; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

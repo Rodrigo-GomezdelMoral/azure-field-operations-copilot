@@ -20,22 +20,18 @@ COMPONENTS = [
 ]
 SEVERITIES = ["minor", "moderate", "severe", "critical"]
 SAFETY = ["none", "stop before work", "lock-out required"]
+
+
+def field(description: str, enum: list[str] | None = None) -> ContentFieldDefinition:
+    method = "classify" if enum else "generate"
+    return ContentFieldDefinition(method=method, type="string", enum=enum, description=description)
+
+
 FIELDS = {
-    "component_type": ContentFieldDefinition(
-        method="classify", type="string", enum=COMPONENTS, description="The damaged component"
-    ),
-    "visible_damage": ContentFieldDefinition(
-        method="generate", type="string", description="What is visibly wrong, in one sentence"
-    ),
-    "severity": ContentFieldDefinition(
-        method="classify", type="string", enum=SEVERITIES, description="How far the damage has progressed"
-    ),
-    "safety_flag": ContentFieldDefinition(
-        method="classify",
-        type="string",
-        enum=SAFETY,
-        description="Whether the equipment must be stopped or locked out before work",
-    ),
+    "component_type": field("The damaged component", COMPONENTS),
+    "visible_damage": field("What is visibly wrong, in one sentence"),
+    "severity": field("How far the damage has progressed", SEVERITIES),
+    "safety_flag": field("Whether the equipment must be stopped or locked out before work", SAFETY),
 }
 
 

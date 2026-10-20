@@ -1,0 +1,85 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: rg-fopcopilot-prod-swc
+  REGISTRY: craiplatformsharedswc
+  API_APP: ca-fopapi
+  ERROR_BUDGET_PERCENT: "5"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build both images inside the shared registry
+        run: |
+          az acr build --registry "$REGISTRY" --image "azure-field-operations-copilot/api:${{ github.sha }}" --file Dockerfile . --only-show-errors
+          az acr build --registry "$REGISTRY" --image "azure-field-operations-copilot/web:${{ github.sha }}" --file web/Dockerfile web --only-show-errors
+          server=$(az acr show --name "$REGISTRY" --query loginServer -o tsv)
+          echo "API_IMAGE=$server/azure-field-operations-copilot/api:${{ github.sha }}" >> "$GITHUB_ENV"
+          echo "WEB_IMAGE=$server/azure-field-operations-copilot/web:${{ github.sha }}" >> "$GITHUB_ENV"
+
+      - name: Pin all API traffic to the revision that serves today
+        run: |
+          az extension add --name containerapp --upgrade --only-show-errors
+          previous=$(az containerapp show -g "$RESOURCE_GROUP" -n "$API_APP" --query properties.latestRevisionName -o tsv)
+          az containerapp ingress traffic set -g "$RESOURCE_GROUP" -n "$API_APP" --revision-weight "$previous=100" --output none
+          echo "PREVIOUS=$previous" >> "$GITHUB_ENV"
+
+      - name: Create the new API revision and give it 10 % of the traffic
+        run: |
+          az containerapp update -g "$RESOURCE_GROUP" -n "$API_APP" --image "$API_IMAGE" --revision-suffix "r${{ github.run_number }}" --output none
+          candidate=$(az containerapp show -g "$RESOURCE_GROUP" -n "$API_APP" --query properties.latestRevisionName -o tsv)
+          az containerapp ingress traffic set -g "$RESOURCE_GROUP" -n "$API_APP" --revision-weight "$PREVIOUS=90" "$candidate=10" --output none
+          echo "CANDIDATE=$candidate" >> "$GITHUB_ENV"
+
+      - name: Observe the canary for five minutes and compare its error rate with the budget
+        run: |
+          fqdn=$(az containerapp show -g "$RESOURCE_GROUP" -n "$API_APP" --query properties.configuration.ingress.fqdn -o tsv)
+          for i in $(seq 1 30); do
+            curl -s -o /dev/null "https://$fqdn/healthz"
+            curl -s -o /dev/null "https://$fqdn/v1/interventions/canary"
+            sleep 10
+          done
+          id=$(az containerapp show -g "$RESOURCE_GROUP" -n "$API_APP" --query id -o tsv)
+          query="sum(value[0].timeseries[].data[?total != null].total | [])"
+          errors=$(az monitor metrics list --resource "$id" --metric Requests --aggregation Total --interval PT5M --offset 6m \
+            --filter "revisionName eq '$CANDIDATE' and statusCodeCategory eq '5xx'" --query "$query" -o tsv)
+          total=$(az monitor metrics list --resource "$id" --metric Requests --aggregation Total --interval PT5M --offset 6m \
+            --filter "revisionName eq '$CANDIDATE'" --query "$query" -o tsv)
+          echo "canary $CANDIDATE: ${errors:-0} server errors out of ${total:-0} requests"
+          python3 -c "import sys; e, t = float('${errors:-0}'), float('${total:-0}'); sys.exit(0 if t == 0 or e * 100 / t <= $ERROR_BUDGET_PERCENT else 1)"
+
+      - name: Promote the canary to 100 %
+        run: az containerapp ingress traffic set -g "$RESOURCE_GROUP" -n "$API_APP" --revision-weight "$CANDIDATE=100" --output none
+
+      - name: Roll back to the previous revision on an error-rate regression
+        if: failure() && env.CANDIDATE != ''
+        run: |
+          az containerapp ingress traffic set -g "$RESOURCE_GROUP" -n "$API_APP" --revision-weight "$PREVIOUS=100" --output none
+          az containerapp revision deactivate -g "$RESOURCE_GROUP" -n "$API_APP" --revision "$CANDIDATE" --output none
+
+      - name: Deploy the MCP server, the A2A server, the jobs and the web container
+        run: |
+          for app in ca-fopmcp ca-fopa2a; do
+            az containerapp update -g "$RESOURCE_GROUP" -n "$app" --image "$API_IMAGE" --output none
+          done
+          for job in caj-fopseed caj-fopindexer caj-fopeval; do
+            az containerapp job update -g "$RESOURCE_GROUP" -n "$job" --image "$API_IMAGE" --output none
+          done
+          az containerapp update -g "$RESOURCE_GROUP" -n ca-fopweb --image "$WEB_IMAGE" --output none

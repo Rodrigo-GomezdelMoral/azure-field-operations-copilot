@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install the pinned dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint, format, types, tests and budget
+        run: |
+          ruff check .
+          ruff format --check .
+          mypy
+          pytest -q
+
+      - name: Build and lint every Bicep template
+        run: |
+          for template in infra/main.bicep infra/modules/*.bicep; do
+            az bicep build --file "$template" --stdout --only-show-errors > /dev/null
+            az bicep lint --file "$template" --only-show-errors
+          done
+
+      - name: Secrets, emails and identifiers over the full history
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.21.2 \
+            detect --source /repo --config /repo/.gitleaks.toml --log-opts="--all" --redact --no-banner
+
+      - name: Vulnerable dependencies in the lock files and the Dockerfiles
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Audit the Python dependencies
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Type-check and build the frontend
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
