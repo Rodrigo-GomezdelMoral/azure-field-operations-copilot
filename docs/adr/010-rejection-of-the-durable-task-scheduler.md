@@ -31,7 +31,9 @@ Keep the framework's checkpoints in Cosmos; do not add the scheduler.
 
 ## Consequences
 
-- Resume is explicit in the API: `get_latest(workflow_name=intervention id)` then
+- Resume is explicit in the API: the newest checkpoint of the intervention that holds a pending
+  request (`latest_pending` in `app/workflow.py`; two checkpoints can share a timestamp, so the
+  iteration count breaks the tie — a restart test caught `get_latest` picking the wrong one) then
   `workflow.run(responses=..., checkpoint_id=...)`. The route that resumes is the route that
   authorises, so the two can never be ordered wrongly (ADR-007).
 - Pending requests have no built-in expiry. `app.pending_request_age_hours` is recorded on every

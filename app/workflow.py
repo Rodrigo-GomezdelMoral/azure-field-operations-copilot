@@ -1,8 +1,16 @@
-from collections.abc import AsyncIterator, Mapping
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
 
-from agent_framework import CheckpointStorage, Content, MCPStreamableHTTPTool, Message, Workflow, WorkflowEvent
+from agent_framework import (
+    CheckpointStorage,
+    Content,
+    MCPStreamableHTTPTool,
+    Message,
+    Workflow,
+    WorkflowCheckpoint,
+    WorkflowEvent,
+)
 from agent_framework.orchestrations import HandoffAgentUserRequest, HandoffBuilder
 
 from app.agents import build_agents
@@ -40,25 +48,22 @@ def create_workflow(runtime: Runtime, intervention: Intervention) -> Workflow:
 
 
 def run_events(
-    runtime: Runtime,
-    workflow: Workflow,
-    actor: str,
-    intervention_id: str,
-    *,
-    message: Message | None = None,
-    responses: Mapping[str, Any] | None = None,
-    checkpoint_id: str | None = None,
+    runtime: Runtime, workflow: Workflow, actor: str, intervention_id: str, **run_kwargs: Any
 ) -> AsyncIterator[WorkflowEvent]:
+    """Streams one run; `run_kwargs` carry the first message, or the responses and checkpoint id of a resume."""
     kwargs = {"intervention_id": intervention_id, "actor": actor}
     stream = workflow.run(
-        message,
-        stream=True,
-        responses=responses,
-        checkpoint_id=checkpoint_id,
-        checkpoint_storage=runtime.storage,
-        function_invocation_kwargs=kwargs,
+        stream=True, checkpoint_storage=runtime.storage, function_invocation_kwargs=kwargs, **run_kwargs
     )
     return stream.__aiter__()
+
+
+async def latest_pending(storage: CheckpointStorage, workflow_name: str) -> WorkflowCheckpoint | None:
+    """The newest checkpoint holding a pending request; two may share a timestamp, so the iteration breaks the tie."""
+    checkpoints = [
+        c for c in await storage.list_checkpoints(workflow_name=workflow_name) if c.pending_request_info_events
+    ]
+    return max(checkpoints, key=lambda c: (c.timestamp, c.iteration_count), default=None)
 
 
 def pending_request(event: WorkflowEvent) -> PendingRequest | None:
@@ -69,18 +74,11 @@ def pending_request(event: WorkflowEvent) -> PendingRequest | None:
         call = getattr(data, "function_call", None)
         arguments = (call.parse_arguments() if call is not None else None) or {}
         tool = str(getattr(call, "name", "")) or None
-        return PendingRequest(
-            request_id=event.request_id,
-            kind="function_approval",
-            agent=agent,
-            tool=tool,
-            arguments=dict(arguments),
-            payload=data.to_dict(),
-        )
+        extra: dict[str, Any] = {"arguments": dict(arguments), "payload": data.to_dict()}
+        return PendingRequest(request_id=event.request_id, kind="function_approval", agent=agent, tool=tool, **extra)
     if isinstance(data, HandoffAgentUserRequest):
-        return PendingRequest(
-            request_id=event.request_id, kind="user_question", agent=agent, question=data.agent_response.text
-        )
+        question = data.agent_response.text
+        return PendingRequest(request_id=event.request_id, kind="user_question", agent=agent, question=question)
     return None
 
 

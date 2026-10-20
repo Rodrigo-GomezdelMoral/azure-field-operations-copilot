@@ -250,8 +250,8 @@ mitigate it.
   (`ops/seed.py`). The conveyor family has no manual of its own and is diagnosed from the pump and
   motor sourcebooks.
 - **Budgets, measured.** 61 tracked files against a ceiling of 62, where the specification's 48
-  predates its mandated layout; 1,200 lines of Python for the application and operations code
-  against the specification's 1,200, and 947 for the evaluation harness and tests against a
+  predates its mandated layout; 1,198 lines of Python for the application and operations code
+  against the specification's 1,200, and 948 for the evaluation harness and tests against a
   ceiling of 950 that phase 7 raised from 700 when the harness alone measured 330; 449 lines of
   Bicep against 450; 469 of TypeScript against 700; 2 comments. `tests/test_budget.py` enforces
   each.

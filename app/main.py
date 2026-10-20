@@ -20,7 +20,7 @@ from app.config import Settings
 from app.models import AuditEvent, Fault, Intervention, PendingRequest, RequestResponse
 from app.telemetry import configure, pending_age
 from app.tools import FieldTools
-from app.workflow import Runtime, create_workflow, pending_request, response_for, run_events
+from app.workflow import Runtime, create_workflow, latest_pending, pending_request, response_for, run_events
 
 LOGIN = "https://login.microsoftonline.com"
 AUDIT = "SELECT * FROM c WHERE c.intervention_id = @id ORDER BY c.at"
@@ -176,7 +176,7 @@ async def respond(intervention_id: str, body: RequestResponse, request: Request,
     fields: dict[str, Any] = {"intervention_id": intervention_id, "agent": pending.agent, "actor": claims["oid"]}
     record = AuditEvent(**fields, tool=pending.tool or "question", arguments=pending.arguments, outcome=decision)
     await runtime.clients.container("audit").create_item(record.model_dump(mode="json"))
-    checkpoint = await runtime.storage.get_latest(workflow_name=intervention_id)
+    checkpoint = await latest_pending(runtime.storage, intervention_id)
     if checkpoint is None:
         raise HTTPException(409, "no checkpoint to resume from")
     workflow, responses = create_workflow(runtime, intervention), {pending.request_id: response_for(pending, body)}

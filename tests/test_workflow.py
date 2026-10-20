@@ -13,6 +13,7 @@ from agent_framework import (
 )
 from agent_framework import InMemoryCheckpointStorage as Storage
 
+from app import workflow as flow
 from app.config import Settings
 from app.models import Intervention, PendingRequest, RequestResponse
 from app.tools import FieldTools
@@ -73,7 +74,7 @@ async def run_to_approval(storage: Storage, settings: Settings) -> tuple[Runtime
     events = [e async for e in run_events(first, workflow, "tech-1", "int-1", message=message)]
     pending = next(p for p in map(pending_request, events) if p)
     assert pending.kind == "function_approval" and pending.tool == "create_work_order" and patches(first) == []
-    checkpoint = await storage.get_latest(workflow_name="int-1")
+    checkpoint = await flow.latest_pending(storage, "int-1")
     assert checkpoint is not None
     return first, (pending, checkpoint)
 

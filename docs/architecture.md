@@ -112,7 +112,7 @@ sequenceDiagram
     A2->>C: read intervention
     A2->>A2: authorise(): supervisor role, and oid ≠ technician_id — before any checkpoint is read
     A2->>C: audit {outcome: approved, actor: supervisor}
-    A2->>C: get_latest(workflow_name = intervention id)
+    A2->>C: list_checkpoints(workflow_name = intervention id) → newest with a pending request
     A2->>A2: workflow.run(responses={request_id: approval}, checkpoint_id, checkpoint_storage)
     A2->>C: reserve_parts runs once · audit {outcome: executed}
     A2-->>W: SSE: Parts → WorkOrder → create_work_order → second approval …
