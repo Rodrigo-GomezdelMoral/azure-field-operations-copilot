@@ -131,9 +131,9 @@ async def stream_run(
             await runtime.clients.events.send(
                 CloudEvent(source="/fieldops/api", type="FieldOps.ApprovalRequested", data=payload)
             )
-    patched = intervention.model_copy(update={"status": status, "pending": pending})
-    await container.upsert_item(patched.model_dump(mode="json"))
     final = {"status": status, "pending": pending.model_dump(mode="json") if pending else None}
+    operations = [{"op": "set", "path": f"/{key}", "value": value} for key, value in final.items()]
+    await container.patch_item(intervention.id, partition_key=intervention.id, patch_operations=operations)
     yield f"event: status\ndata: {json.dumps(final)}\n\n"
 
 

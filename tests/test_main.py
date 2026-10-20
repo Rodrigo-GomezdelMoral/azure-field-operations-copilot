@@ -29,8 +29,7 @@ class JWKS:
 
 def bearer(oid: str, roles: list[str]) -> dict[str, str]:
     claims = {"aud": FAKE["api_audience"], "iss": f"{main.LOGIN}/{TENANT}/v2.0", "oid": oid, "roles": roles}
-    token = jwt.encode(claims | {"exp": int(time.time()) + 60}, KEY, algorithm="RS256")
-    return {"Authorization": f"Bearer {token}"}
+    return {"Authorization": f"Bearer {jwt.encode(claims | {'exp': int(time.time()) + 60}, KEY, algorithm='RS256')}"}
 
 
 @pytest.fixture
@@ -55,10 +54,9 @@ def test_token_and_app_role_are_enforced(client: TestClient) -> None:
 def test_forwarded_identity_is_honoured_only_from_the_proxy_principal(client: TestClient, settings: Settings) -> None:
     settings.proxy_principal_id = "web-proxy"
     forwarded = {"x-forwarded-user": "tech-1", "x-forwarded-roles": "supervisor"}
-    assert client.get("/v1/interventions/int-1", headers=bearer("web-proxy", TECHNICIAN) | forwarded).status_code == 200
-    assert (
-        client.get("/v1/interventions/int-1", headers=bearer("someone-else", TECHNICIAN) | forwarded).status_code == 403
-    )
+    proxied, direct = bearer("web-proxy", TECHNICIAN) | forwarded, bearer("someone-else", TECHNICIAN) | forwarded
+    assert client.get("/v1/interventions/int-1", headers=proxied).status_code == 200
+    assert client.get("/v1/interventions/int-1", headers=direct).status_code == 403
 
 
 def test_separation_of_duties_is_checked_before_any_checkpoint_is_loaded(settings: Settings) -> None:

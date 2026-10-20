@@ -5,7 +5,7 @@ import asyncio
 import json
 import re
 import sys
-from collections.abc import AsyncIterator, Mapping
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
@@ -31,6 +31,7 @@ from agent_framework import (
 )
 from agent_framework.exceptions import ChatClientException
 from agent_framework.foundry import FoundryEvals
+from azure.core.exceptions import ClientAuthenticationError, HttpResponseError
 
 from app.clients import Clients, build_clients
 from app.config import Settings
@@ -156,12 +157,8 @@ def plant_inventory(inventory: MCPStreamableHTTPTool, tools: PlantedTools) -> No
 
 
 def load(name: str) -> list[Case]:
-    lines = (HERE / "datasets" / f"{name}.jsonl").read_text(encoding="utf-8").splitlines()
-    return [json.loads(line) for line in lines if line.strip()]
-
-
-async def collect(events: AsyncIterator[WorkflowEvent]) -> list[WorkflowEvent]:
-    return [event async for event in events]
+    path = HERE / "datasets" / f"{name}.jsonl"
+    return [json.loads(row) for row in path.read_text(encoding="utf-8").splitlines() if row]
 
 
 async def drive(runtime: Runtime, case: Case) -> tuple[Workflow, list[WorkflowEvent]]:
@@ -171,9 +168,8 @@ async def drive(runtime: Runtime, case: Case) -> tuple[Workflow, list[WorkflowEv
     workflow, parts = create_workflow(runtime, intervention), [Content.from_text(case["input"])]
     if case["image"]:
         parts.append(Content.from_data(data=(HERE / "datasets" / case["image"]).read_bytes(), media_type="image/jpeg"))
-    segment = await collect(
-        run_events(runtime, workflow, "eval-technician", intervention.id, message=Message("user", parts))
-    )
+    first = run_events(runtime, workflow, "eval-technician", intervention.id, message=Message("user", parts))
+    segment = [event async for event in first]
     events: list[WorkflowEvent] = []
     for _ in range(6):
         events += segment
@@ -183,7 +179,8 @@ async def drive(runtime: Runtime, case: Case) -> tuple[Workflow, list[WorkflowEv
         decision = bool(case["approve"].get(pending.tool or "", False))
         body = RequestResponse(request_id=pending.request_id, approved=decision, answer=case["answer"])
         responses = {pending.request_id: response_for(pending, body)}
-        segment = await collect(run_events(runtime, workflow, "eval-supervisor", intervention.id, responses=responses))
+        resumed = run_events(runtime, workflow, "eval-supervisor", intervention.id, responses=responses)
+        segment = [event async for event in resumed]
     return workflow, events + segment
 
 
@@ -247,6 +244,13 @@ def summarise(cases: list[Case], agent_results: list[EvalResults], case_results:
     return {"cases": len(cases), "metrics": metrics | judged}
 
 
+async def judged(judge: FoundryEvals, items: list[EvalItem]) -> tuple[EvalResults | None, str | None]:
+    try:
+        return await judge.evaluate(items, eval_name="agents"), None
+    except (ClientAuthenticationError, HttpResponseError) as error:
+        return None, str(error)[:300]
+
+
 async def run_suites(
     clients: Clients, settings: Settings, suites: list[str], judge: FoundryEvals | None
 ) -> tuple[dict[str, Any], EvalResults]:
@@ -273,12 +277,12 @@ async def run_suites(
     await inventory.close()
     agent_results = [await LocalEvaluator(*AGENT_CHECKS).evaluate(agent_items, eval_name="agents")]
     case_results = [await LocalEvaluator(*CASE_CHECKS).evaluate(case_items, eval_name="cases")]
-    if judge is not None:
-        agent_results.append(await judge.evaluate(agent_items, eval_name="agents"))
+    verdicts, judge_error = await judged(judge, agent_items) if judge is not None else (None, None)
+    agent_results += [verdicts] if verdicts is not None else []
     for row, result in zip([r for r in rows if "error" not in r], case_results[0].items, strict=True):
         row["failed"] = {s.name: (s.sample or {}).get("reason") for s in result.scores if not s.passed}
     report = summarise(cases, agent_results, case_results) | {"suites": suites, "rows": rows}
-    report["errors"] = sum(1 for row in rows if "error" in row)
+    report["errors"], report["judge_error"] = sum(1 for row in rows if "error" in row), judge_error
     report["judge"] = [{"status": r.status, "report_url": redact(r.report_url)} for r in agent_results[1:]]
     return report, agent_results[0]
 
