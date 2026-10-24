@@ -1,4 +1,4 @@
-import { StrictMode, useRef, useState } from "react";
+import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { type Fault, type Fixture, type Frame, type Persona, type Run, type Step, DEMO, PERSONAS, activeAgent, draft, fold, open, recorded, respond } from "./api";
 
@@ -60,11 +60,19 @@ function Trace({ run, running }: { run: Run; running: boolean }) {
   );
 }
 
+/** A card that needs the person's attention scrolls itself into view when it appears. */
+function useRevealed() {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }), []);
+  return ref;
+}
+
 function Approval({ run, persona, busy, onDecide }: { run: Run; persona: Persona; busy: boolean; onDecide: (approved: boolean, reason: string) => void }) {
   const [reason, setReason] = useState("");
+  const card = useRevealed();
   const pending = run.pending!;
   return (
-    <section className="approval">
+    <section className="approval" ref={card}>
       <h2>Approval requested · {pending.agent} wants to run {pending.tool}</h2>
       <pre className="call" style={{ margin: "0 0 8px", whiteSpace: "pre-wrap" }}>{JSON.stringify(pending.arguments, null, 1)}</pre>
       {persona.supervisor ? (
@@ -84,8 +92,9 @@ function Approval({ run, persona, busy, onDecide }: { run: Run; persona: Persona
 
 function Question({ run, busy, onAnswer }: { run: Run; busy: boolean; onAnswer: (answer: string) => void }) {
   const [answer, setAnswer] = useState("");
+  const card = useRevealed();
   return (
-    <section className="question">
+    <section className="question" ref={card}>
       <h2>{run.pending!.agent} asks the technician</h2>
       <p className="text" style={{ margin: "0 0 8px" }}>{run.pending!.question}</p>
       <form onSubmit={(event) => (event.preventDefault(), onAnswer(answer))}>
@@ -102,7 +111,7 @@ function WorkOrder({ run }: { run: Run }) {
   const parts = (order.parts as { part_number: string; quantity: number }[] | undefined) ?? [];
   const final = [...run.steps].reverse().find((step) => step.agent === "WorkOrder" && step.kind === "text")?.text;
   return (
-    <section className="order wide">
+    <section className="order">
       <h2>Work order · {final?.match(/WO-[A-Z0-9]+/)?.[0] ?? "draft"}</h2>
       <dl>
         <dt>Asset</dt><dd>{String(order.asset_id)}</dd>
@@ -167,6 +176,10 @@ function App() {
         <p>Four specialists prepare the intervention; no part is reserved and no work order is created without a supervisor's approval.</p>
       </header>
       <main>
+        <div className="side">
+        {run.pending?.kind === "function_approval" && <Approval run={run} persona={persona} busy={running} onDecide={(approved, reason) => decide({ approved, reason })} />}
+        {run.pending?.kind === "user_question" && <Question run={run} busy={running} onAnswer={(answer) => decide({ answer })} />}
+        <WorkOrder run={run} />
         <section>
           <h2>Fault report</h2>
           <form onSubmit={(event) => (event.preventDefault(), start(null, asset, description))}>
@@ -193,10 +206,8 @@ function App() {
           {error && <div className="error" style={{ marginTop: 10 }}>{error}</div>}
           <p className="status" style={{ margin: "10px 0 0" }}><b>{run.status.replace("_", " ")}</b> · {STATUS[run.status] ?? ""}{run.id && run.id !== "demo" ? ` · intervention ${run.id}` : ""}</p>
         </section>
+        </div>
         {(run.steps.length > 0 || running) && <Trace run={run} running={running} />}
-        {run.pending?.kind === "function_approval" && <Approval run={run} persona={persona} busy={running} onDecide={(approved, reason) => decide({ approved, reason })} />}
-        {run.pending?.kind === "user_question" && <Question run={run} busy={running} onAnswer={(answer) => decide({ answer })} />}
-        <WorkOrder run={run} />
       </main>
     </>
   );
