@@ -63,6 +63,10 @@ const fixtures = Object.values(import.meta.glob<Fixture>("../fixtures/*.json", {
 export const recorded = fixtures;
 
 const asText = (value: unknown): string => (typeof value === "string" ? value : JSON.stringify(value, null, 1) ?? "");
+const compact = (text: string): string => text.replace(/\s+/g, " ").trim();
+/** The orchestration re-emits an agent's complete message after its streamed chunks; that repeat is not shown twice. */
+const repeated = (steps: Step[], agent: string, text: string): boolean =>
+  text.length > 80 && steps.some((step) => step.kind === "text" && step.agent === agent && compact(step.text) === compact(text));
 
 /** Folds one server-sent frame into the trace: streamed chunks of the same message or tool call are merged. */
 export function fold(run: Run, frame: Frame): Run {
@@ -73,6 +77,7 @@ export function fold(run: Run, frame: Frame): Run {
   for (const content of frame.data.contents) {
     const last = steps[steps.length - 1];
     if (content.type === "text" && content.text) {
+      if (repeated(steps, agent, content.text)) continue;
       if (last && last.kind === "text" && last.agent === agent) steps[steps.length - 1] = { ...last, text: last.text + content.text };
       else steps.push({ agent, kind: "text", text: content.text });
     } else if (content.type === "function_call" && content.name) {
