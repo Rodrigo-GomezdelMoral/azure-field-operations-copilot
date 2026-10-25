@@ -3,7 +3,7 @@ name: eval
 on:
   pull_request:
     branches: [main]
-    paths: ["app/**", "prompts/**", "ops/**", "eval/**", "mcp_inventory/**"]
+    paths: ["app/**", "prompts/**", "ops/**", "eval/**", "mcp_inventory/**", "requirements.txt"]
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
