@@ -49,8 +49,7 @@ async def test_asset_history_reads_the_registry_and_the_resolved_cases() -> None
 async def test_write_tools_require_approval_and_touch_cosmos_only_through_the_intervention() -> None:
     field, clients, _ = tools(stock=3)
     assert field.reserve_parts.approval_mode == "always_require" == field.create_work_order.approval_mode
-    lines = [PartLine(part_number="P-1010", quantity=2)]
-    ctx = context(intervention_id="abc")
+    lines, ctx = [PartLine(part_number="P-1010", quantity=2)], context(intervention_id="abc")
     text = str(await field.reserve_parts.invoke(arguments={"lines": lines}, context=ctx, skip_parsing=True))
     assert text.startswith("Reservation abc-") and clients.containers["inventory"].items["P-1010"]["stock"] == 1
     refused = str(await field.reserve_parts.invoke(arguments={"lines": lines}, context=ctx, skip_parsing=True))

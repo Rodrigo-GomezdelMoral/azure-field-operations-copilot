@@ -50,6 +50,8 @@ agents are.
 - An external party cannot call a specialist by name through the Foundry endpoint. The one
   specialist that should be callable from outside, Diagnostic, is exposed through A2A by this
   repository (ADR-006), read-only and behind Entra.
-- If the hosted service later offers middleware, approvals and checkpoints with the same
-  guarantees, this decision should be revisited; the agents would move with their prompts, the
-  tools would stay local.
+
+## Revisit when
+
+The hosted service offers middleware, approvals and checkpoints with the same guarantees. The
+agents would then move with their prompts, and the tools would stay local.

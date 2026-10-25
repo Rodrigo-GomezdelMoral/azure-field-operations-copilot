@@ -63,3 +63,9 @@ equipment model.
 - **Everything in Cosmos.** The manuals need a layout model, chunking by heading and a semantic
   ranker over hundreds of pages; that is what the search service is for and what the RAG platform
   already proved.
+
+## Revisit when
+
+The case memory of one equipment model grows past what a `quantizedFlat` index searches within the
+request budget (tens of thousands of cases), or cases need the keyword and semantic ranking the
+manuals already get; the cases then become a second index on the search service.

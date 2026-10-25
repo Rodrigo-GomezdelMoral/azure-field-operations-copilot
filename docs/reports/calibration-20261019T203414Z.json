@@ -1,0 +1,22 @@
+{
+  "items": 30,
+  "judged": 30,
+  "judge_status": "completed",
+  "judge_report_url": "https://ai.azure.com/nextgen/r/<subscription>,rg-aiplatform-shared-swc,,fdry-aiplatform-shared-swc,proj-aiplatform-shared/build/evaluations/eval_1bc102b172054012b7a11bb8572acd20/run/evalrun_40a1f2def8c24ed190dbfe58b538cbd0",
+  "judge_errors": [],
+  "judge_names": [
+    "intent_resolution",
+    "task_adherence",
+    "tool_call_accuracy"
+  ],
+  "task_adherence": {
+    "pairs": 30,
+    "agreement": 0.8,
+    "kappa": 0.583
+  },
+  "tool_call_accuracy": {
+    "pairs": 30,
+    "agreement": 0.8333333333333334,
+    "kappa": 0.667
+  }
+}

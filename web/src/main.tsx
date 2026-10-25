@@ -63,7 +63,9 @@ function Trace({ run, running }: { run: Run; running: boolean }) {
 /** A card that needs the person's attention scrolls itself into view when it appears. */
 function useRevealed() {
   const ref = useRef<HTMLElement>(null);
-  useEffect(() => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }), []);
+  useEffect(() => {
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
   return ref;
 }
 

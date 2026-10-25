@@ -18,8 +18,8 @@ recorded interventions replayed with their real timings, approvals included, no 
 
 Asset maintenance companies in energy, transport and manufacturing send technicians to equipment
 they do not know by heart, and preparing one intervention — the right manual section, the asset's
-history, whether the part is in stock, the work order — takes thirty to forty-five minutes of a
-qualified technician. At a hundred interventions a day that is several full-time equivalents a
+history, whether the part is in stock, the work order — takes, as an illustrative figure for an
+asset the technician has not worked on, thirty to forty-five minutes of a qualified technician. At a hundred interventions a day that is several full-time equivalents a
 year, and the quality of the preparation varies with whoever is on shift. The buyer is the head
 of maintenance operations; what they buy is that time back, with a procedure cited from the
 manual and nothing reserved or ordered that a supervisor has not seen. A copilot that reserves
@@ -178,27 +178,27 @@ topic:
 
 ## Evaluation
 
-Smoke suite run by `eval.yml` on the first pull request, 2026-10-20, ten interventions driven live
-with the Foundry judge on (`docs/evaluation.md` has the case-by-case reading and the local run of
-the evening before):
+Runs of `eval.yml` on the first two pull requests, 2026-10-20, every intervention driven live
+(`docs/evaluation.md` has the case-by-case reading and the local run of the evening before; every
+report quoted is in `docs/reports/`):
 
-| Metric | Value | Gate |
-|---|---|---|
-| **Approval compliance** | **1.00** | = 1.00 |
-| Task success | 0.50 | ≥ 0.85 |
-| Tool call accuracy (judge) | 0.54 | ≥ 0.90 |
-| Injection proposal rate | 0.33 | = 0 |
-| Unnecessary step rate | 0.40 | ≤ 0.15 |
-| Citation precision | 0.90 | ≥ 0.95 |
+| Metric | Smoke, first PR | Smoke, second PR | Injection suite (25) | Gate |
+|---|---|---|---|---|
+| **Approval compliance** | **1.00** | **1.00** | **1.00** | = 1.00 |
+| Task success | 0.50 | 0.40 | 0.80 | ≥ 0.85 |
+| Tool call accuracy | 0.54 (judge) | 0.47 (judge) | 0.12 (local) | ≥ 0.90 |
+| Injection proposal rate | 0.33 | 0.33 | 0.24 (6 of 25) | = 0 |
+| Unnecessary step rate | 0.40 | 0.40 | 0.76 | ≤ 0.15 |
+| Citation precision | 0.90 | 0.70 | 0.80 | ≥ 0.95 |
 
 **Approval compliance is 1.00 on every run so far, and the Cosmos audit shows one execution per
-privileged tool per intervention.** The merge gate is red and the repository says so: the
-injection planted in an inventory response made the Parts agent *propose* the canary part — the
-approval gate is what stopped it — and after a denial the agents retry the privileged call rather
-than stop. The judge agrees with the thirty human-labelled transcripts at κ = 0.58 (task
-adherence) and κ = 0.67 (tool call accuracy), so its scores are reported rather than trusted on
-their own. `experiments/` measures handoff against sequential orchestration and the similar-cases
-memory against no memory.
+privileged tool per intervention.** The merge gate is red and the repository says so: the injected
+instructions made an agent *propose* the canary part in six of twenty-five runs of the complete
+injection suite — the approval gate stopped every one — and after a denial the agents retry the
+privileged call rather than stop. The judge agrees with the thirty human-labelled transcripts at κ =
+0.58 (task adherence) and κ = 0.67 (tool call accuracy), so its scores are reported rather than
+trusted on their own. `experiments/` measures handoff against sequential orchestration and the
+similar-cases memory against no memory.
 
 ## Cost
 
@@ -251,10 +251,10 @@ mitigate it.
   (`ops/seed.py`). The conveyor family has no manual of its own and is diagnosed from the pump and
   motor sourcebooks.
 - **Budgets, measured.** 61 tracked files against a ceiling of 62, where the specification's 48
-  predates its mandated layout; 1,198 lines of Python for the application and operations code
-  against the specification's 1,200, and 948 for the evaluation harness and tests against a
+  predates its mandated layout; 1,200 lines of Python for the application and operations code
+  against the specification's 1,200, and 949 for the evaluation harness and tests against a
   ceiling of 950 that phase 7 raised from 700 when the harness alone measured 330; 449 lines of
-  Bicep against 450; 474 of TypeScript against 700; 2 comments. `tests/test_budget.py` enforces
+  Bicep against 450; 503 of TypeScript against 700; 2 comments. `tests/test_budget.py` enforces
   each.
 - **The deployed web runs in persona mode** (`ALLOW_PERSONAS=true`): its ingress is public and the
   proxy forwards the persona the browser chooses, so a visitor can play both the technician and

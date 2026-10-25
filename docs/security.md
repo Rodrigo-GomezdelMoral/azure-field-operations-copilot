@@ -24,6 +24,11 @@ or history.
 | the shared search service's identity | Storage Blob Data Reader | the `manuals` container | `infra/modules/data.bicep` |
 | `gh-azure-field-operations-copilot` (GitHub OIDC) | Contributor; Role Based Access Control Administrator; Contributor on the shared registry (`az acr build`); Azure AI User, Cognitive Services OpenAI User (the judge's graders), Search Index Data Reader, Cosmos SQL Data Contributor (the evaluation suite runs real interventions) | this resource group; both groups; the shared registry, project, account and search service; the Cosmos account | bootstrap step in the README |
 
+**The inventory MCP server takes no token.** It is reached on the environment's internal ingress
+only, and that is its authentication (ADR-011): any workload inside the Container Apps environment
+could call its two read-only tools, nothing outside it can, and this repository is the
+environment's only tenant. ADR-011 names the day that changes.
+
 No identity holds a role it does not need: the MCP server can read one container and write
 nothing; the A2A server reads the manual, the registry and the case memory and writes nothing;
 the web proxy can only ask the API; the API cannot touch the index definition or the blobs; the

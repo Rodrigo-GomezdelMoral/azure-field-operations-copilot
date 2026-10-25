@@ -4,9 +4,8 @@
 **Change under test:** the context provider replaced by one that adds nothing (`app/agents.py`,
 `SimilarCasesProvider`), everything else identical
 
-**Reports:** `eval/results/experiments-20261019T222059Z-handoff.json` (memory on) and
-`eval/results/experiments-20261019T223548Z-handoff_no_memory.json` (memory off); the results
-directory is not committed, the summaries are reproduced here.
+**Reports:** `docs/reports/experiments-20261019T222059Z-handoff.json` (memory on) and
+`docs/reports/experiments-20261019T223548Z-handoff_no_memory.json` (memory off).
 
 ## Hypothesis
 

@@ -52,3 +52,9 @@ no public surface and no privilege worth stealing.
 - **No MCP server at all**, the inventory read as a local tool. Simpler, and it would hide the
   one integration pattern an enterprise actually asks about: how does an agent reach a system it
   does not own?
+
+## Revisit when
+
+The inventory owner offers writes over MCP with its own approval and audit, and the protocol carries
+the signed-in user's identity end to end. Until both exist, a write over MCP moves the guarantee out
+of this repository's tests.

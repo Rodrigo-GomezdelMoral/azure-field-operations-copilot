@@ -61,7 +61,8 @@ audit trail, the A2A card, the MCP reads, and the web proxy.
 | **Total** | **about €20 to €45** | |
 
 A technician's preparation time is the comparison the product makes: thirty to forty-five
-minutes of a qualified technician per intervention against one and a half cents of tokens.
+minutes of a qualified technician per intervention, an illustrative figure rather than a measured
+one, against one and a half cents of tokens.
 
 ## Projection to production (modelled)
 

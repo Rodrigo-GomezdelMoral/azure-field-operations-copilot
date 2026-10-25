@@ -60,3 +60,9 @@ answer becomes the response, the technician is the only authorised responder.
 - **Service Bus queue plus a pending-approvals table.** Standard, and twice the state.
 - **Durable Task Scheduler** as the orchestration runtime (ADR-010): a second orchestrator under
   the one the framework already provides.
+
+## Revisit when
+
+A framework upgrade changes the checkpoint format so that an approval pending across a deployment
+can no longer be resumed, or approvals must outlive the checkpoint container's retention. Either
+makes a queue with its own schema worth its second copy of state.

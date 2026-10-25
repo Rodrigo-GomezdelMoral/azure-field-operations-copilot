@@ -30,8 +30,7 @@ def clients(stock: int = 5) -> FakeClients:
 
 async def run_chain(settings: Settings, fakes: FakeClients, name: str, arguments: dict[str, Any]) -> tuple[str, Audit]:
     tools = FieldTools(fakes, settings)
-    function = getattr(tools, name)
-    ctx = context(intervention_id="abc", actor="supervisor-1")
+    function, ctx = getattr(tools, name), context(intervention_id="abc", actor="supervisor-1")
     ctx.function, ctx.arguments = function, arguments
     policy, audit = PolicyMiddleware(fakes, settings), AuditMiddleware(fakes, "Parts")
 
@@ -92,8 +91,7 @@ def test_agents_are_wired_with_the_right_tools_providers_and_middleware(settings
 
 def test_a2a_exposes_the_read_only_advisor_and_requires_the_diagnose_role(settings: Settings) -> None:
     fakes = clients()
-    names = sorted(t.name for t in a2a.advisor(fakes, settings).default_options["tools"])
-    card = a2a.card(settings)
+    names, card = sorted(t.name for t in a2a.advisor(fakes, settings).default_options["tools"]), a2a.card(settings)
     assert names == ["asset_history", "search_manual"] and not card.capabilities.streaming
     assert [skill.id for skill in card.skills] == ["diagnose"] and "reserves nothing" in card.description
     app = Starlette(routes=a2a.routes(fakes, settings), middleware=[Middleware(a2a.RoleGate)])
