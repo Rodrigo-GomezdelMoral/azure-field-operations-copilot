@@ -153,7 +153,7 @@ restores the catalogue. A model request that times out fails that case only; the
 under `errors`. The Foundry judge needs the Cognitive Services OpenAI User role on the account for
 the identity that runs the suite, and its portal link is stored with the subscription segment
 redacted. `eval.yml` runs `smoke` (with the judge) and `tool_injection` (local checks only) as two jobs on
-every pull request that touches `app/`, `prompts/`, `ops/`, `eval/` or `mcp_inventory/`, each
+every pull request that touches `app/`, `prompts/`, `ops/`, `eval/`, `mcp_inventory/` or `requirements.txt`, each
 starting the MCP server on its runner, and posts the metrics of both as one pull-request comment.
 
 ## Known limits
