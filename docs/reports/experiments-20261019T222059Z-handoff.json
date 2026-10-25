@@ -1,0 +1,234 @@
+{
+  "variant": "handoff",
+  "window": [
+    "2026-10-19T22:14:53.427180+00:00",
+    "2026-10-19T22:20:59.880106+00:00"
+  ],
+  "summary": {
+    "cases": 8,
+    "errors": 0,
+    "task_success": 0.125,
+    "citation_precision": 1.0,
+    "mean_steps": 12.25,
+    "mean_seconds": 45.75
+  },
+  "rows": [
+    {
+      "id": "task-001",
+      "seconds": 59,
+      "steps": 12,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 1,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['fields']"
+      },
+      "diagnosis": "    1) Most likely cause \u2014 one sentence plus evidence\n- Most likely cause: worn, glazed or under-tensioned V-belt(s) on drive F-101 causing slip that increases under load. Evidence: the symptom is classic belt slip under load; the manual identifies belt drives as subject to efficiency loss and the n"
+    },
+    {
+      "id": "task-002",
+      "seconds": 48,
+      "steps": 11,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts"
+      ],
+      "approvals": 0,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['work order created', 'fields']"
+      },
+      "diagnosis": "     "
+    },
+    {
+      "id": "task-003",
+      "seconds": 46,
+      "steps": 14,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 1,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['fields']"
+      },
+      "diagnosis": "     Most likely cause (one sentence + evidence)\n- Most likely cause: worn or under-lubricated gearbox bearings (bearing wear or inadequate oil) causing gear/ bearing noise \u2014 evidence: you report \"gearbox noise\"; the manuals identify bearing wear and oil quality/level as common causes of excessive n"
+    },
+    {
+      "id": "task-004",
+      "seconds": 46,
+      "steps": 14,
+      "tool_calls": [
+        "asset_history",
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "reserve_parts",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 2,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['fields']"
+      },
+      "diagnosis": "  1) Most likely cause \u2014 one sentence and evidence\n- Most likely cause: a failing bearing (lubrication loss or bearing wear) on fan F-105 (CF-450) causing overheating and reduced line output. Evidence: the symptom is an overheating bearing reported this morning with reduced output (typical of a degr"
+    },
+    {
+      "id": "task-005",
+      "seconds": 49,
+      "steps": 14,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "part_stock",
+        "part_stock",
+        "part_stock",
+        "part_stock",
+        "reserve_parts",
+        "reserve_parts",
+        "reserve_parts"
+      ],
+      "approvals": 3,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": false,
+      "reasons": {
+        "task_success": "failed: ['work order created', 'fields']",
+        "no_unnecessary_step": "outside the expected set: ['reserve_parts']"
+      },
+      "diagnosis": "  "
+    },
+    {
+      "id": "task-006",
+      "seconds": 47,
+      "steps": 14,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "part_stock",
+        "part_stock",
+        "reserve_parts",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 2,
+      "task_success": true,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {},
+      "diagnosis": "  1) Most likely cause (one sentence + evidence)\n- Most likely cause: accelerated bearing wear (and/or misalignment) causing high vibration at full load. Evidence: the manual states that high loads, poor lubrication, high operating temperature and vibration accelerate bearing wear and recommends che"
+    },
+    {
+      "id": "task-007",
+      "seconds": 25,
+      "steps": 6,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 1,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['diagnosis', 'fields']"
+      },
+      "diagnosis": "  I cannot locate the VX-31 (VFD-102) drive manual in the searchable library, so I cannot produce a manual-cited diagnosis or procedures yet. Before I can diagnose using the manual, I need one precise piece of information:\n\n- What exact fault/trip code or message did VFD-102 display on the drive key"
+    },
+    {
+      "id": "task-008",
+      "seconds": 46,
+      "steps": 13,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "reserve_parts",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 2,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['diagnosis', 'fields']"
+      },
+      "diagnosis": "   1) Most likely cause (one sentence + evidence)\n- Most likely cause: inadequate drive cooling due to a failed or obstructed cooling fan or insufficient auxiliary cooling, causing the VFD to overheat. Evidence: the fault is thermal/overheating; the manual highlights that VFDs can require additional"
+    }
+  ]
+}

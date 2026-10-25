@@ -50,3 +50,9 @@ still exercised by the tests and visible in the interface.
   with the supervisor role. That is the intended property, stated in the README.
 - The audit record of the executed tool carries the approver as `actor` (ADR-008), so the trail
   shows who asked and who approved as two different identities.
+
+## Revisit when
+
+A customer site with a single qualified person needs the copilot. The two-account rule then becomes
+a per-customer policy, for example a delayed self-approval flagged in the audit, decided by that
+customer and never the default.

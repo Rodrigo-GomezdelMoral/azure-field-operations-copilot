@@ -54,3 +54,8 @@ not run, on behalf of a user they cannot see.
   (ADR-007).
 - **A plain REST endpoint for the diagnosis.** Simpler, and the caller would need a bespoke
   client; the A2A card and task model are what another agent runtime already speaks.
+
+## Revisit when
+
+A partner needs the advisor to propose a reservation. The answer is a second, write-capable agent
+behind the same approval gate and separation of duties, never write tools on the advisor.

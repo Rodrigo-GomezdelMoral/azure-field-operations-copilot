@@ -68,4 +68,5 @@ class AuditEvent(BaseModel):
     arguments: dict[str, Any]
     outcome: Literal["executed", "rejected", "requested", "approved", "denied", "answered"]
     actor: str
+    reason: str | None = None
     at: datetime = Field(default_factory=lambda: datetime.now(UTC))

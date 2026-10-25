@@ -1,0 +1,57 @@
+{
+  "variant": "sequential",
+  "window": [
+    "2026-10-19T22:38:22.058126+00:00",
+    "2026-10-19T22:44:04.177712+00:00"
+  ],
+  "summary": {
+    "cases": 8,
+    "errors": 8,
+    "task_success": null,
+    "citation_precision": null,
+    "mean_steps": null,
+    "mean_seconds": null
+  },
+  "rows": [
+    {
+      "id": "task-001",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 45
+    },
+    {
+      "id": "task-002",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Model deployment rate limit exceeded. Your requests to gpt-5-mini for gpt-5-mini in swedencent",
+      "seconds": 99
+    },
+    {
+      "id": "task-003",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Model deployment rate limit exceeded. Your requests to gpt-5-mini for gpt-5-mini in swedencent",
+      "seconds": 1
+    },
+    {
+      "id": "task-004",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Model deployment rate limit exceeded. Your requests to gpt-5-mini for gpt-5-mini in swedencent",
+      "seconds": 1
+    },
+    {
+      "id": "task-005",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 38
+    },
+    {
+      "id": "task-006",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 84
+    },
+    {
+      "id": "task-007",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 33
+    },
+    {
+      "id": "task-008",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 40
+    }
+  ]
+}

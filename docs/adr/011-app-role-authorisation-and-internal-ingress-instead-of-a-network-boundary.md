@@ -54,3 +54,10 @@ reads `memory` and `assets`, only the API identity writes.
 - Private endpoints remain costed, not built, in the landing zone's ADR; adding them later changes
   nothing in this repository's authorisation model, which is the point of making the model
   independent of the network.
+
+## Revisit when
+
+A second workload shares the Container Apps environment, so internal ingress becomes a boundary
+shared with code this repository does not own. The inventory server then requires a token from
+`id-fopapi` through the MCP tool's `header_provider`, checked by Container Apps authentication on
+`ca-fopmcp`; or the landing zone deploys private endpoints.

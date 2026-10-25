@@ -1,0 +1,241 @@
+{
+  "variant": "handoff_no_memory",
+  "window": [
+    "2026-10-19T22:29:29.970664+00:00",
+    "2026-10-19T22:35:48.680472+00:00"
+  ],
+  "summary": {
+    "cases": 8,
+    "errors": 0,
+    "task_success": 0.0,
+    "citation_precision": 0.875,
+    "mean_steps": 12.75,
+    "mean_seconds": 47.375
+  },
+  "rows": [
+    {
+      "id": "task-001",
+      "seconds": 59,
+      "steps": 21,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 1,
+      "task_success": false,
+      "citations_grounded": false,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['fields']",
+        "citations_grounded": "a diagnosis without any section reference"
+      },
+      "diagnosis": "      Most likely cause (one sentence + evidence)\n- Most likely cause: inadequate belt tension or a worn/contaminated drive belt (causing slip under increasing torque). Evidence: slipping increases under load (classic sign of insufficient tension or belt wear), and belt-slip faults on similar drive "
+    },
+    {
+      "id": "task-002",
+      "seconds": 39,
+      "steps": 8,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "handoff_to_Parts"
+      ],
+      "approvals": 0,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['diagnosis', 'work order created', 'fields']"
+      },
+      "diagnosis": "   "
+    },
+    {
+      "id": "task-003",
+      "seconds": 35,
+      "steps": 9,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "handoff_to_WorkOrder"
+      ],
+      "approvals": 0,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['work order created', 'fields']"
+      },
+      "diagnosis": "    I can't find any CV-101 gearbox procedure in the manuals I searched. I need one precise diagnostic detail from you before I can produce a manual-backed diagnosis and step-by-step procedure:\n\nWhat is the noise like (choose one): high-pitched whining, grinding/grating, knocking/thumping, or interm"
+    },
+    {
+      "id": "task-004",
+      "seconds": 34,
+      "steps": 10,
+      "tool_calls": [
+        "asset_history",
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 1,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['fields']"
+      },
+      "diagnosis": " Most likely cause (one sentence + evidence)\n- Most likely cause: a failing or under-lubricated fan bearing (bearing wear or lubrication failure). Evidence: the symptom is a newly overheating bearing with reduced line output starting this morning; the manual describes worn or poorly lubricated beari"
+    },
+    {
+      "id": "task-005",
+      "seconds": 59,
+      "steps": 18,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "reserve_parts",
+        "reserve_parts",
+        "reserve_parts",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 4,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": false,
+      "reasons": {
+        "task_success": "failed: ['fields']",
+        "no_unnecessary_step": "outside the expected set: ['reserve_parts']"
+      },
+      "diagnosis": "    Most likely cause (one sentence) and evidence\n- Most likely cause: insufficient net positive suction head (NPSH) / suction-side flow disruption causing cavitation (vapor bubble formation and collapse) in P-101, evidenced by the crackling/popping \u201cmarbles\u201d noise you report, the immediate onset th"
+    },
+    {
+      "id": "task-006",
+      "seconds": 46,
+      "steps": 11,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_Diagnostic",
+        "handoff_to_Parts"
+      ],
+      "approvals": 0,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['diagnosis', 'work order created', 'fields']"
+      },
+      "diagnosis": "     "
+    },
+    {
+      "id": "task-007",
+      "seconds": 56,
+      "steps": 12,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "find_parts",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "handoff_to_Parts",
+        "handoff_to_WorkOrder"
+      ],
+      "approvals": 0,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['diagnosis', 'work order created', 'fields']"
+      },
+      "diagnosis": "    "
+    },
+    {
+      "id": "task-008",
+      "seconds": 51,
+      "steps": 13,
+      "tool_calls": [
+        "asset_history",
+        "handoff_to_Diagnostic",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "search_manual",
+        "handoff_to_Parts",
+        "find_parts",
+        "find_parts",
+        "part_stock",
+        "reserve_parts",
+        "handoff_to_WorkOrder",
+        "create_work_order"
+      ],
+      "approvals": 2,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['diagnosis', 'fields']"
+      },
+      "diagnosis": "    Most likely cause (one sentence + evidence)\n- Most likely cause: inadequate cooling of VFD-101 (blocked/failed internal cooling fan or insufficient airflow) causing the drive to overheat; evidence: the symptom is overheating, the manual warns that VFDs and their motors can overheat when integral"
+    }
+  ]
+}

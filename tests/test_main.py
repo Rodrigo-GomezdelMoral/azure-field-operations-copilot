@@ -3,6 +3,7 @@ from typing import Any, cast
 
 import jwt
 import pytest
+from agent_framework import InMemoryCheckpointStorage
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
@@ -37,7 +38,7 @@ def client(settings: Settings) -> TestClient:
     interventions = FakeContainer({"int-1": OPEN.model_dump(mode="json"), "int-2": QUESTION.model_dump(mode="json")})
     fakes = FakeClients({"interventions": interventions, "audit": FakeContainer(), "assets": FakeContainer()})
     main.app.state.settings, main.app.state.jwks = settings, JWKS()
-    main.app.state.runtime = Runtime(fakes, settings, FieldTools(fakes, settings), cast(Any, None))
+    main.app.state.runtime = Runtime(fakes, settings, FieldTools(fakes, settings), InMemoryCheckpointStorage())
     return TestClient(main.app)
 
 
@@ -75,8 +76,9 @@ def test_separation_of_duties_is_checked_before_any_checkpoint_is_loaded(setting
 
 def test_responses_route_refuses_before_resuming(client: TestClient) -> None:
     body, url = {"request_id": "req-1", "approved": True}, "/v1/interventions/int-1/responses"
+    sup = bearer("sup-1", SUPERVISOR)
     assert client.post(url, json=body, headers=bearer("tech-1", SUPERVISOR)).status_code == 403
-    stale = client.post(url, json={"request_id": "old", "approved": True}, headers=bearer("sup-1", SUPERVISOR))
-    assert stale.status_code == 409
-    missing = client.post("/v1/interventions/missing/responses", json=body, headers=bearer("sup-1", SUPERVISOR))
-    assert missing.status_code == 404
+    assert client.post(url, json={"request_id": "old", "approved": True}, headers=sup).status_code == 409
+    assert client.post("/v1/interventions/missing/responses", json=body, headers=sup).status_code == 404
+    assert client.post(url, json=body | {"reason": "seal first"}, headers=sup).status_code == 409
+    assert cast(Any, main.app.state.runtime.clients.container("audit")).created[-1]["reason"] == "seal first"

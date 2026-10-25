@@ -1,0 +1,77 @@
+{
+  "variant": "sequential",
+  "window": [
+    "2026-10-19T22:20:59.886074+00:00",
+    "2026-10-19T22:29:29.966591+00:00"
+  ],
+  "summary": {
+    "cases": 8,
+    "errors": 6,
+    "task_success": 0.0,
+    "citation_precision": 1.0,
+    "mean_steps": 0.5,
+    "mean_seconds": 108.0
+  },
+  "rows": [
+    {
+      "id": "task-001",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 97
+    },
+    {
+      "id": "task-002",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 48
+    },
+    {
+      "id": "task-003",
+      "seconds": 174,
+      "steps": 0,
+      "tool_calls": [],
+      "approvals": 0,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['diagnosis', 'work order created', 'fields']"
+      },
+      "diagnosis": ""
+    },
+    {
+      "id": "task-004",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 37
+    },
+    {
+      "id": "task-005",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 29
+    },
+    {
+      "id": "task-006",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 47
+    },
+    {
+      "id": "task-007",
+      "error": "(\"<class 'agent_framework_foundry._chat_client.FoundryChatClient'> service failed to complete the prompt: Error code: 400 - {'error': {'message': 'No tool call found for function call output with call",
+      "seconds": 36
+    },
+    {
+      "id": "task-008",
+      "seconds": 42,
+      "steps": 1,
+      "tool_calls": [
+        "create_work_order"
+      ],
+      "approvals": 1,
+      "task_success": false,
+      "citations_grounded": true,
+      "no_unnecessary_step": true,
+      "reasons": {
+        "task_success": "failed: ['diagnosis', 'fields']"
+      },
+      "diagnosis": ""
+    }
+  ]
+}

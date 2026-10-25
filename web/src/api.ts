@@ -68,6 +68,17 @@ const compact = (text: string): string => text.replace(/\s+/g, " ").trim();
 const repeated = (steps: Step[], agent: string, text: string): boolean =>
   text.length > 80 && steps.some((step) => step.kind === "text" && step.agent === agent && compact(step.text) === compact(text));
 
+const complete = (text: string): boolean => {
+  try {
+    JSON.parse(text);
+    return true;
+  } catch {
+    return false;
+  }
+};
+/** Tool arguments stream in chunks and are then re-emitted whole under the same call id; the whole copy replaces them. */
+const merge = (previous: string, chunk: string): string => (complete(previous) && complete(chunk) ? chunk : previous + chunk);
+
 /** Folds one server-sent frame into the trace: streamed chunks of the same message or tool call are merged. */
 export function fold(run: Run, frame: Frame): Run {
   if (frame.type === "status") return { ...run, status: frame.status ?? run.status, pending: frame.pending ?? null };
@@ -83,7 +94,7 @@ export function fold(run: Run, frame: Frame): Run {
     } else if (content.type === "function_call" && content.name) {
       const index = steps.findIndex((step) => step.callId === content.call_id);
       const chunk = asText(content.arguments ?? "");
-      if (index >= 0) steps[index] = { ...steps[index]!, args: (steps[index]!.args ?? "") + chunk };
+      if (index >= 0) steps[index] = { ...steps[index]!, args: merge(steps[index]!.args ?? "", chunk) };
       else {
         const handoff = content.name.startsWith("handoff_to_");
         const text = handoff ? `→ ${content.name.slice("handoff_to_".length)}` : content.name;

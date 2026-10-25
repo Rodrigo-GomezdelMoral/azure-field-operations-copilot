@@ -54,3 +54,9 @@ without a handoff is a question to the technician, which the framework surfaces 
   visible, testable, and does not couple the tool to the orchestration.
 - Experiment 001 compares this choice with a sequential pipeline on task success, step count and
   cost rather than taking it on faith.
+
+## Revisit when
+
+A fault needs two specialists working at the same time (the parts search running while the diagnosis
+is still open), which is the concurrent pattern's case; or experiment 001, repeated on the full
+suite, shows a sequential pipeline reaching the same task success in fewer steps.

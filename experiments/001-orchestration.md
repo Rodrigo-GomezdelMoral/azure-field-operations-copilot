@@ -5,9 +5,9 @@ same four agents, tools and prompts built with `SequentialBuilder` in the fixed 
 Triage → Diagnostic → Parts → WorkOrder, first with the default chaining and then with
 `chain_only_agent_responses=True`
 
-**Reports:** `eval/results/experiments-20261019T222059Z-handoff.json`,
-`experiments-20261019T222929Z-sequential.json`, `experiments-20261019T224404Z-sequential.json`
-(the results directory is not committed; the figures are reproduced here)
+**Reports:** `docs/reports/experiments-20261019T222059Z-handoff.json`,
+`experiments-20261019T222929Z-sequential.json` and `experiments-20261019T224404Z-sequential.json`
+in the same folder
 
 ## Hypothesis
 

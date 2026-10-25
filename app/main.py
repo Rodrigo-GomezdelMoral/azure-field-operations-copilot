@@ -174,7 +174,8 @@ async def respond(intervention_id: str, body: RequestResponse, request: Request,
     authorise(runtime.settings, claims, intervention, pending)
     decision = ("approved" if body.approved else "denied") if pending.kind == "function_approval" else "answered"
     fields: dict[str, Any] = {"intervention_id": intervention_id, "agent": pending.agent, "actor": claims["oid"]}
-    record = AuditEvent(**fields, tool=pending.tool or "question", arguments=pending.arguments, outcome=decision)
+    fields |= {"tool": pending.tool or "question", "outcome": decision, "reason": body.reason}
+    record = AuditEvent(**fields, arguments=pending.arguments)
     await runtime.clients.container("audit").create_item(record.model_dump(mode="json"))
     checkpoint = await latest_pending(runtime.storage, intervention_id)
     if checkpoint is None:

@@ -51,3 +51,9 @@ execution, sets `context.result` to the violation and returns without calling `c
 - `tests/test_agents.py` asserts that a rejected reservation produces an audit record with
   outcome `rejected`, that an executed call produces `executed`, and that the module never calls
   an update method.
+
+## Revisit when
+
+A customer needs the audit to be tamper-evident beyond the data role, as a regulated operator would.
+The next step is an immutable copy (the Cosmos change feed into blob storage with a time-based
+retention policy), not a change to the middleware.

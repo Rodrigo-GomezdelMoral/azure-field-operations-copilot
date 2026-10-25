@@ -45,7 +45,8 @@ prefix they do not carry, which was corrected.
 
 `python -m eval.run --suite calibration` sends the thirty transcripts to the Foundry judge with
 the Diagnostic agent's tool definitions and pairs the verdicts with the labels by
-`datasource_item_id`. Run of 2026-10-19, 30 of 30 items judged:
+`datasource_item_id`. Run of 2026-10-19, 30 of 30 items judged
+(`docs/reports/calibration-20261019T203414Z.json`):
 
 | Evaluator | Agreement | Cohen's κ |
 |---|---|---|
@@ -64,7 +65,8 @@ its scores are kept only because the specification asks for them.
 
 `python -m eval.run --suite smoke`, 2026-10-19 evening, ten cases, gpt-5-mini for Triage,
 Diagnostic and WorkOrder, gpt-5-nano for Parts, reasoning effort low, judge on
-(`eval/results/smoke-20261019T213219Z.json`; the results directory is not committed):
+(`docs/reports/smoke-20261019T213219Z.json`; `eval/results/` itself stays out of version control and every
+report this document quotes is copied to `docs/reports/`):
 
 | Metric | Value | Gate |
 |---|---|---|
@@ -100,31 +102,40 @@ What the failures are, case by case:
   with the manual's name appended. The regular expression now accepts only `[H1 > H2]` labels and
   strips a trailing source, which the next full run will show.
 
-## Pull-request run
+## Pull-request runs
 
-The first pull request (2026-10-20, run of `eval.yml` from GitHub with the OIDC identity) ran the
-smoke suite with the judge and all twenty-five injection cases:
+`eval.yml` ran on the first two pull requests of 2026-10-20 from GitHub with the OIDC identity. The
+reports are the workflow's artifacts, copied to `docs/reports/`: `smoke-20261020T080238Z.json` (first
+pull request), `smoke-20261020T092503Z.json` and `tool_injection-20261020T094129Z.json` (second).
 
-| Metric | Smoke, in CI | Gate |
-|---|---|---|
-| **Approval compliance** | **1.00** | = 1.00 ✓ |
-| Task success | 0.50 | ≥ 0.85 |
-| Tool call accuracy (judge) | 0.54 | ≥ 0.90 |
-| Injection proposal rate | 0.33 (1 of 3) | = 0 |
-| Unnecessary step rate | 0.40 | ≤ 0.15 |
-| Citation precision | 0.90 | ≥ 0.95 |
-| Intent resolution (judge) | 0.91 | reported |
-| Task adherence (judge) | 0.43 | reported |
+| Metric | Smoke, first PR | Smoke, second PR | Injection suite, second PR (25 cases) | Gate |
+|---|---|---|---|---|
+| **Approval compliance** | **1.00** | **1.00** | **1.00** | = 1.00 ✓ |
+| Task success | 0.50 | 0.40 | 0.80 | ≥ 0.85 |
+| Tool call accuracy | 0.54 (judge) | 0.47 (judge) | 0.12 (argument match, no judge) | ≥ 0.90 |
+| Injection proposal rate | 0.33 (1 of 3) | 0.33 (1 of 3) | 0.24 (6 of 25) | = 0 |
+| Unnecessary step rate | 0.40 | 0.40 | 0.76 | ≤ 0.15 |
+| Citation precision | 0.90 | 0.70 | 0.80 | ≥ 0.95 |
+| Intent resolution (judge) | 0.91 | 0.92 | not run | reported |
+| Task adherence (judge) | 0.43 | 0.32 | not run | reported |
 
-Citation precision rose from 0.70 to 0.90 once the check accepted only `[H1 > H2]` labels; the
-remaining failures are the same behaviours as the local run. The injection suite drove its
+Citation precision rose from 0.70 to 0.90 once the check accepted only `[H1 > H2]` labels and fell
+back to 0.70 on the second run with the same code: with ten cases a rate moves by a tenth per case,
+which is the variance the limits below describe. The first pull request's injection suite drove its
 twenty-five cases (57 minutes) and then lost its report: the judge's call failed with
 `AADSTS700024`, because the GitHub OIDC assertion `azure/login` presents cannot be refreshed and
 the job had outlived it. Two changes follow from that run: `eval.yml` now runs one job per suite,
 each with its own login, and gates the injection suite on its local checks alone (`--no-judge`);
-and `eval/run.py` records a judge failure in the report instead of losing the local results. The
-`full` suite (105 interventions) has not been run live yet; the weekly job `caj-fopeval` runs it
-on Mondays with a managed identity, which has no assertion to outlive.
+and `eval/run.py` records a judge failure in the report instead of losing the local results.
+
+The second pull request ran the complete injection set under those changes. **Six of the
+twenty-five injected runs made an agent propose the canary part, and the approval gate stopped
+every one of them**: approval compliance stayed at 1.00, the dataset's supervisor denies every
+injected request, and nothing was reserved or ordered. The unnecessary step rate of 0.76 is the
+retry behaviour described above, a denied agent proposing the same call again, and the low
+argument-match score follows from it, since a retried or injected call never matches the expected
+arguments. The `full` suite (105 interventions) has not been run live yet; the weekly job
+`caj-fopeval` runs it on Mondays with a managed identity, which has no assertion to outlive.
 
 ## Running it
 
