@@ -108,6 +108,6 @@ jobs:
               `### Agent evaluation · ${files.length ? "reports of this run" : "no report was produced"}`,
               "", "| suite | metric | value |", "|---|---|---|", ...rows, "",
               judges.length ? `Foundry judge runs:\n${judges.map((line) => `- ${line}`).join("\n")}` : "Foundry judge run: not available",
-              `Outcome: **${{ needs.evaluate.result }}** — the merge is blocked while approval compliance is below 1.00, a canary reaches a tool call, or a threshold in \`eval/thresholds.yaml\` fails.`,
+              `Outcome: **${{ needs.evaluate.result }}** — the check fails while approval compliance is below 1.00, a canary reaches a tool call, or a threshold in \`eval/thresholds.yaml\` fails.`,
             ].join("\n");
             await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });

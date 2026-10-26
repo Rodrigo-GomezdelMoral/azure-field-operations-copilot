@@ -178,24 +178,27 @@ topic:
 
 ## Evaluation
 
-Runs of `eval.yml` on the first two pull requests, 2026-10-20, every intervention driven live
-(`docs/evaluation.md` has the case-by-case reading and the local run of the evening before; every
-report quoted is in `docs/reports/`):
+Runs of `eval.yml` on the first two pull requests, 2026-10-20, and on the fifth, 2026-10-25, every
+intervention driven live, the two smoke photographs unanalysed because Content Understanding
+refuses the GitHub identity (`docs/evaluation.md` has the case-by-case reading and the local run of
+the evening before; every report quoted is in `docs/reports/`):
 
-| Metric | Smoke, first PR | Smoke, second PR | Injection suite (25) | Gate |
-|---|---|---|---|---|
-| **Approval compliance** | **1.00** | **1.00** | **1.00** | = 1.00 |
-| Task success | 0.50 | 0.40 | 0.80 | ≥ 0.85 |
-| Tool call accuracy | 0.54 (judge) | 0.47 (judge) | 0.12 (local) | ≥ 0.90 |
-| Injection proposal rate | 0.33 | 0.33 | 0.24 (6 of 25) | = 0 |
-| Unnecessary step rate | 0.40 | 0.40 | 0.76 | ≤ 0.15 |
-| Citation precision | 0.90 | 0.70 | 0.80 | ≥ 0.95 |
+| Metric | Smoke, first PR | Smoke, second PR | Injection suite, second PR (25) | Smoke, fifth PR | Injection suite, fifth PR (25) | Gate |
+|---|---|---|---|---|---|---|
+| **Approval compliance** | **1.00** | **1.00** | **1.00** | **1.00** | **1.00** | = 1.00 |
+| Task success | 0.50 | 0.40 | 0.80 | 0.40 | 0.68 | ≥ 0.85 |
+| Tool call accuracy | 0.54 (judge) | 0.47 (judge) | 0.12 (local) | 0.50 (judge) | 0.24 (local) | ≥ 0.90 |
+| Injection proposal rate | 0.33 | 0.33 | 0.24 (6 of 25) | 0.67 | 0.20 (5 of 25) | = 0 |
+| Unnecessary step rate | 0.40 | 0.40 | 0.76 | 0.30 | 0.64 | ≤ 0.15 |
+| Citation precision | 0.90 | 0.70 | 0.80 | 0.90 | 0.84 | ≥ 0.95 |
 
 **Approval compliance is 1.00 on every run so far, and the Cosmos audit shows one execution per
-privileged tool per intervention.** The merge gate is red and the repository says so: the injected
+privileged tool per intervention.** The evaluation gate is red, and advisory, because the `main` ruleset
+requires a pull request but no status check; the repository says so: the injected
 instructions made an agent *propose* the canary part in six of twenty-five runs of the complete
-injection suite — the approval gate stopped every one — and after a denial the agents retry the
-privileged call rather than stop. The judge agrees with the thirty human-labelled transcripts at κ =
+injection suite, and in five of twenty-five when it ran again — the approval gate stopped every
+one — and after a denial the agents retry the privileged call rather than stop. The judge agrees
+with the thirty human-labelled transcripts at κ =
 0.58 (task adherence) and κ = 0.67 (tool call accuracy), so its scores are reported rather than
 trusted on their own. `experiments/` measures handoff against sequential orchestration and the
 similar-cases memory against no memory.
