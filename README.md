@@ -27,19 +27,9 @@ parts on its own is not a saving, it is a liability.
 
 ## Architecture
 
-```mermaid
-graph LR
-    T["Technician's phone"] --> WEB["ca-fopweb · proxy with managed identity"]
-    WEB -->|"Entra token · Copilot.Use"| API["ca-fopapi · one handoff workflow per intervention"]
-    API --> WF["Triage → Diagnostic → Parts → WorkOrder"]
-    WF -->|"MCP, read-only"| MCP["ca-fopmcp · internal ingress only"]
-    WF --> CU["Content Understanding · photograph → damage fields"]
-    WF --> PROJ["Foundry project (shared) · gpt-5-mini, gpt-5-nano"]
-    WF --> SRCH[("AI Search (shared) · manuals")]
-    WF --> COS[("Cosmos DB · interventions, checkpoints, audit, case memory")]
-    API -->|"ApprovalRequested"| EG["Event Grid"]
-    EXT["Field-service system"] -->|"A2A · Copilot.Diagnose"| A2A["ca-fopa2a · DiagnosticAdvisor, read-only"]
-```
+![The technician's web reaches the API through a proxy; four agents use an internal MCP server, Content Understanding, the shared Foundry project and AI Search, and keep checkpoints and the audit in Cosmos DB](docs/images/architecture.png)
+
+![The copilot's resource group as deployed, in the Azure portal](docs/images/resource-group.png)
 
 The two write tools, `reserve_parts` and `create_work_order`, are local tools with
 `approval_mode="always_require"`. A run stops at the approval, the checkpoint lives in Cosmos,
@@ -71,6 +61,13 @@ flowchart TD
 actually take is fixed by the handoff tools it holds — Triage to Diagnostic or Parts, Diagnostic
 to Parts or WorkOrder, Parts to WorkOrder or back to Diagnostic, WorkOrder to nobody
 (`app/workflow.py`).
+
+## In action
+
+A live run stopped at the approval: the work order is drafted, and only a supervisor who did not
+open the intervention can let it run.
+
+![The deployed web waiting for a supervisor's approval before create_work_order runs, next to the agents' trace](docs/images/approval-waiting.png)
 
 ## What this demonstrates
 
@@ -246,29 +243,3 @@ mitigate it.
 | [009](docs/adr/009-rejection-of-fides-while-every-sink-requires-a-human.md) | Rejection: FIDES, while every sink requires a human |
 | [010](docs/adr/010-rejection-of-the-durable-task-scheduler.md) | Rejection: Durable Task Scheduler |
 | [011](docs/adr/011-app-role-authorisation-and-internal-ingress-instead-of-a-network-boundary.md) | App-role authorisation and internal ingress instead of a network boundary |
-
-## Scope and simplifications
-
-- **One plant, four asset families, four public-domain manuals** (US Department of Energy
-  sourcebooks), a synthetic catalogue of 24 assets, 16 parts and 300 resolved cases
-  (`ops/seed.py`). The conveyor family has no manual of its own and is diagnosed from the pump and
-  motor sourcebooks.
-- **Budgets, measured.** 61 tracked files against a ceiling of 62, where the specification's 48
-  predates its mandated layout; 1,200 lines of Python for the application and operations code
-  against the specification's 1,200, and 949 for the evaluation harness and tests against a
-  ceiling of 950 that phase 7 raised from 700 when the harness alone measured 330; 449 lines of
-  Bicep against 450; 503 of TypeScript against 700; 2 comments. `tests/test_budget.py` enforces
-  each.
-- **The deployed web runs in persona mode** (`ALLOW_PERSONAS=true`): its ingress is public and the
-  proxy forwards the persona the browser chooses, so a visitor can play both the technician and
-  the supervisor. With Entra authentication on the web container the same proxy forwards the
-  signed-in user's object id and roles instead, and the API trusts nothing else.
-- **The Event Grid subscriber is out of scope**; the event is published and its shape is above.
-- **The search service lives in North Europe** while everything else is in Sweden Central, and its
-  semantic ranker is on the free plan the landing zone chose; the manual search is hybrid (keyword
-  and vector) without it.
-- **The deployment workflow updates images with `az containerapp`** rather than `azd deploy`, so
-  the canary revision and its traffic split are explicit; `azd up` remains the way to provision
-  and deploy from a workstation.
-- **Reasoning effort is low** on every model call; a routine intervention takes two to four
-  minutes end to end and the interface shows the specialists working rather than hiding them.
