@@ -142,8 +142,9 @@ async function stream(url: string, body: object, persona: Persona, onFrame: (fra
     const frames = buffer.split("\n\n");
     buffer = frames.pop() ?? "";
     for (const raw of frames) {
-      const line = raw.split("\n").find((item) => item.startsWith("data: "));
-      if (line) onFrame(JSON.parse(line.slice(6)) as Frame);
+      const lines = raw.split("\n"), line = lines.find((item) => item.startsWith("data: "));
+      const event = lines.find((item) => item.startsWith("event: "))?.slice(7) ?? "";
+      if (line) onFrame({ type: event, ...(JSON.parse(line.slice(6)) as Partial<Frame>) });
     }
   }
 }
