@@ -1,5 +1,7 @@
 # Industrial Field Operations Copilot
 
+Built by **Rodrigo Martín Gómez del Moral Herranz** · [LinkedIn](https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz) · [Portfolio](https://rodrigogomez.es)
+
 Four specialist agents on Microsoft Agent Framework prepare a maintenance intervention from a
 technician's fault report or photograph: the manual section, the asset's history, similar
 resolved cases, the parts in stock and a drafted work order. What makes it an enterprise system
@@ -13,6 +15,11 @@ recorded interventions replayed with their real timings, approvals included, no 
 
 [![ci](https://github.com/Rodrigo-GomezdelMoral/azure-field-operations-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/Rodrigo-GomezdelMoral/azure-field-operations-copilot/actions/workflows/ci.yml)
 [![eval](https://github.com/Rodrigo-GomezdelMoral/azure-field-operations-copilot/actions/workflows/eval.yml/badge.svg)](https://github.com/Rodrigo-GomezdelMoral/azure-field-operations-copilot/actions/workflows/eval.yml)
+
+A live run stopped at the approval: the work order is drafted, and only a supervisor who did not
+open the intervention can let it run.
+
+![The deployed web waiting for a supervisor's approval before create_work_order runs, next to the agents' trace](docs/images/approval-waiting.png)
 
 ## The problem
 
@@ -62,12 +69,19 @@ actually take is fixed by the handoff tools it holds — Triage to Diagnostic or
 to Parts or WorkOrder, Parts to WorkOrder or back to Diagnostic, WorkOrder to nobody
 (`app/workflow.py`).
 
+![The four agents and what each one uses: photo analysis, the manuals, the inventory; reserving parts and creating the order wait for a supervisor's approval](docs/images/agents.png)
+
 ## In action
 
-A live run stopped at the approval: the work order is drafted, and only a supervisor who did not
-open the intervention can let it run.
+The approval outlives the process: the run stops, its state is checkpointed in Cosmos DB, and a
+different person answers it from any replica, even after a restart.
 
-![The deployed web waiting for a supervisor's approval before create_work_order runs, next to the agents' trace](docs/images/approval-waiting.png)
+![The run stops at the approval, the process can die, and another person resumes it from the state in Cosmos DB](docs/images/approval.png)
+
+Once approved, the tool runs exactly once and the work order exists, with the procedure cited from
+the manual.
+
+![The deployed web showing the created work order next to the agents' trace](docs/images/work-order.png)
 
 ## What this demonstrates
 
@@ -200,6 +214,8 @@ with the thirty human-labelled transcripts at κ =
 trusted on their own. `experiments/` measures handoff against sequential orchestration and the
 similar-cases memory against no memory.
 
+![ci.yml tests, builds the Bicep and scans for secrets; eval.yml runs the smoke and injection suites into an advisory gate; deploy.yml goes through an approval, a 10 % canary and promotion or rollback; pages.yml publishes the static demo](docs/images/cicd.png)
+
 ## Cost
 
 Measured on 2026-10-20: this resource group has cost €0.0002 month to date because nothing in it
@@ -228,6 +244,18 @@ Event Grid and Application Insights have key access disabled; the CI gate scans 
 for emails and identifiers. `docs/security.md` maps every threat to the file and the test that
 mitigate it.
 
+## Well-Architected design
+
+How the design maps to the five pillars of the Azure Well-Architected Framework, and the trade-off accepted in each.
+
+| Pillar | Applied | Trade-off accepted |
+|---|---|---|
+| Reliability | Approvals survive a process restart: the checkpoint lives in Cosmos DB and any replica resumes it; canary deployment with rollback | One region, scaled to zero between interventions, so the first one after a pause starts cold |
+| Security | No write action without the approval of someone other than the requester; no secret anywhere, key access disabled on storage, Cosmos, Event Grid and Application Insights; a read-only MCP server on internal ingress | No virtual network: app roles and internal ingress are the boundary (ADR-011) |
+| Cost Optimization | €0.014 in tokens per intervention; the group costs almost nothing at rest because nothing runs between interventions | The production projection, a Standard search tier and two warm replicas, is costed at about €380 a month, not deployed |
+| Operational Excellence | One `azd up`; a quality gate, an evaluation gate with a pull-request comment, canary deployment with rollback and a create-only audit of every decision | The evaluation gate is advisory, and the repository reports it red |
+| Performance Efficiency | A handoff workflow where each agent holds only the handoffs it needs, and case memory as a Cosmos vector context provider next to AI Search | Unnecessary steps measured at 0.30 to 0.76 against a 0.15 gate: reported, not yet solved |
+
 ## Decisions
 
 | ADR | Decision |
@@ -243,3 +271,7 @@ mitigate it.
 | [009](docs/adr/009-rejection-of-fides-while-every-sink-requires-a-human.md) | Rejection: FIDES, while every sink requires a human |
 | [010](docs/adr/010-rejection-of-the-durable-task-scheduler.md) | Rejection: Durable Task Scheduler |
 | [011](docs/adr/011-app-role-authorisation-and-internal-ingress-instead-of-a-network-boundary.md) | App-role authorisation and internal ingress instead of a network boundary |
+
+## Author
+
+**Rodrigo Martín Gómez del Moral Herranz** · [LinkedIn](https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz) · [Portfolio](https://rodrigogomez.es)
