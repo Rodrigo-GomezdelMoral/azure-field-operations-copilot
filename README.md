@@ -1,6 +1,8 @@
 # Industrial Field Operations Copilot
 
-Built by **Rodrigo Martín Gómez del Moral Herranz** · [LinkedIn](https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz) · [Portfolio](https://rodrigogomez.es)
+Built by **Rodrigo Martín Gómez del Moral Herranz**
+
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Rodrigo-GomezdelMoral)&nbsp;&nbsp;[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTIwLjQ1IDIwLjQ1aC0zLjU2di01LjU3YzAtMS4zMy0uMDMtMy4wNC0xLjg1LTMuMDQtMS44NSAwLTIuMTQgMS40NS0yLjE0IDIuOTR2NS42N0g5LjM1VjloMy40MXYxLjU2aC4wNWMuNDgtLjkgMS42NC0xLjg1IDMuMzctMS44NSAzLjYgMCA0LjI3IDIuMzcgNC4yNyA1LjQ2djYuMjh6TTUuMzQgNy40M2EyLjA2IDIuMDYgMCAxIDEgMC00LjEyIDIuMDYgMi4wNiAwIDAgMSAwIDQuMTJ6TTcuMTIgMjAuNDVIMy41NlY5aDMuNTZ2MTEuNDV6TTIyLjIyIDBIMS43N0MuNzkgMCAwIC43NyAwIDEuNzN2MjAuNTRDMCAyMy4yMy43OSAyNCAxLjc3IDI0aDIwLjQ1Yy45OCAwIDEuNzgtLjc3IDEuNzgtMS43M1YxLjczQzI0IC43NyAyMy4yIDAgMjIuMjIgMHoiLz48L3N2Zz4%3D)](https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz)&nbsp;&nbsp;[![Portfolio](https://img.shields.io/badge/rodrigogomezdelmoralherranz.es-181717?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8%2BPHBhdGggZD0iTTIgMTJoMjBNMTIgMmExNSAxNSAwIDAgMSAwIDIwTTEyIDJhMTUgMTUgMCAwIDAgMCAyMCIvPjwvc3ZnPg%3D%3D)](https://rodrigogomezdelmoralherranz.es)
 
 Four specialist agents on Microsoft Agent Framework prepare a maintenance intervention from a
 technician's fault report or photograph: the manual section, the asset's history, similar
@@ -9,7 +11,6 @@ rather than a demo: **no write action executes without a human approval, the app
 requester, the approval survives a process restart, and every decision is auditable.** An agent
 with tools is a privileged component; this repository is the control plane that makes it safe.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Rodrigo-GomezdelMoral/azure-field-operations-copilot)
 **Live demo:** <https://rodrigo-gomezdelmoral.github.io/azure-field-operations-copilot/> — three
 recorded interventions replayed with their real timings, approvals included, no backend.
 
@@ -31,6 +32,26 @@ year, and the quality of the preparation varies with whoever is on shift. The bu
 of maintenance operations; what they buy is that time back, with a procedure cited from the
 manual and nothing reserved or ordered that a supervisor has not seen. A copilot that reserves
 parts on its own is not a saving, it is a liability.
+
+## What it does
+
+- Prepares a maintenance intervention from a technician's fault report or photograph: the manual section, the asset's history, similar resolved cases, the parts in stock and a drafted work order.
+- Shares the work among four agents on Microsoft Agent Framework: triage, diagnostic, parts and work order.
+- Never writes without a human: reserving parts or creating the order waits for a supervisor who is not the requester.
+- Survives restarts: the approval waits in a checkpoint in Cosmos DB and resumes on any replica, and every decision is audited.
+- Can be tried without Azure in the published demo, with three recorded interventions, approvals included.
+
+## Repo card
+
+| | |
+|---|---|
+| **Type** | AI application on the shared cloud platform |
+| **Azure services** | Azure Container Apps (API, web, an MCP server, an A2A server and jobs), Azure Cosmos DB (checkpoints, audit and vector memory), Azure Storage, Event Grid, Application Insights and alerts; shared: Microsoft Foundry with Content Understanding, Azure AI Search, Container Registry and Log Analytics |
+| **AI** | Microsoft Agent Framework: four agents in a handoff workflow, human approvals, checkpoints, MCP and A2A; gpt-5-mini and gpt-5-nano, text-embedding-3-small |
+| **Stack** | Python 3.12 with FastAPI; a React and TypeScript web |
+| **Security** | Separation of duties checked before any checkpoint loads; managed identities and no secrets; app roles and internal ingress |
+| **Infrastructure and delivery** | Bicep with azd; GitHub Actions with OIDC: `ci`, `eval`, `deploy` (canary with rollback) and `pages` |
+| **Demo** | <https://rodrigo-gomezdelmoral.github.io/azure-field-operations-copilot/> |
 
 ## Architecture
 
@@ -100,24 +121,56 @@ the manual.
 | Quality gate, evaluation gate with a pull-request comment, canary deployment with rollback, static demo | `.github/workflows/` |
 | Eleven architecture decisions, two of them rejections | `docs/adr/` |
 
-## Quick start
+## Evaluation
 
-With Python 3.12 and Node 22 (the Codespace has both), against the deployed Azure resources with
-your own login:
+Runs of `eval.yml` on the first two pull requests, 2026-10-20, and on the fifth, 2026-10-25, every
+intervention driven live, the two smoke photographs unanalysed because Content Understanding
+refuses the GitHub identity (`docs/evaluation.md` has the case-by-case reading and the local run of
+the evening before; every report quoted is in `docs/reports/`):
 
-```bash
-make install
-cp .env.example .env        # fill the endpoints from `azd env get-values`; REQUIRE_AUTH=false
-make mcp                    # the read-only inventory MCP server on :8020
-make run                    # the API on :8000
-make web                    # the frontend through the same proxy the container runs, on :8080
-```
+| Metric | Smoke, first PR | Smoke, second PR | Injection suite, second PR (25) | Smoke, fifth PR | Injection suite, fifth PR (25) | Gate |
+|---|---|---|---|---|---|---|
+| **Approval compliance** | **1.00** | **1.00** | **1.00** | **1.00** | **1.00** | = 1.00 |
+| Task success | 0.50 | 0.40 | 0.80 | 0.40 | 0.68 | ≥ 0.85 |
+| Tool call accuracy | 0.54 (judge) | 0.47 (judge) | 0.12 (local) | 0.50 (judge) | 0.24 (local) | ≥ 0.90 |
+| Injection proposal rate | 0.33 | 0.33 | 0.24 (6 of 25) | 0.67 | 0.20 (5 of 25) | = 0 |
+| Unnecessary step rate | 0.40 | 0.40 | 0.76 | 0.30 | 0.64 | ≤ 0.15 |
+| Citation precision | 0.90 | 0.70 | 0.80 | 0.90 | 0.84 | ≥ 0.95 |
 
-With `REQUIRE_AUTH=false` the API takes the acting person from the `x-demo-user` header — the
-frontend's persona selector sets it — so one browser can open an intervention as the technician
-and approve it as the supervisor; the separation-of-duties check still applies to the two
-identities. `make check` runs ruff, mypy and the tests, including the budget test;
-`make a2a` starts the A2A server on :8010 and `make smoke` runs the ten-case evaluation.
+**Approval compliance is 1.00 on every run so far, and the Cosmos audit shows one execution per
+privileged tool per intervention.** The evaluation gate is red, and advisory, because the `main` ruleset
+requires a pull request but no status check; the repository says so: the injected
+instructions made an agent *propose* the canary part in six of twenty-five runs of the complete
+injection suite, and in five of twenty-five when it ran again — the approval gate stopped every
+one — and after a denial the agents retry the privileged call rather than stop. The judge agrees
+with the thirty human-labelled transcripts at κ =
+0.58 (task adherence) and κ = 0.67 (tool call accuracy), so its scores are reported rather than
+trusted on their own. `experiments/` measures handoff against sequential orchestration and the
+similar-cases memory against no memory.
+
+![ci.yml tests, builds the Bicep and scans for secrets; eval.yml runs the smoke and injection suites into an advisory gate; deploy.yml goes through an approval, a 10 % canary and promotion or rollback; pages.yml publishes the static demo](docs/images/cicd.png)
+
+## Cost
+
+Measured on 2026-10-20: this resource group has cost €0.0002 month to date because nothing in it
+runs between interventions; the shared platform has cost €24.55, mostly the search service and the
+model calls of every repository. An intervention costs **€0.014 in tokens**, measured from the
+account's token metrics over eight interventions run alone (€0.042 when the judge's graders are
+counted in); a thousand interventions cost about €20 to €45 all in. The production projection —
+2,200 interventions a month, a Standard search tier, two warm replicas — is about €380 a month
+(`docs/cost.md`).
+
+## Well-Architected design
+
+How the design maps to the five pillars of the Azure Well-Architected Framework, and the trade-off accepted in each.
+
+| Pillar | Applied | Trade-off accepted |
+|---|---|---|
+| Reliability | Approvals survive a process restart: the checkpoint lives in Cosmos DB and any replica resumes it; canary deployment with rollback | One region, scaled to zero between interventions, so the first one after a pause starts cold |
+| Security | No write action without the approval of someone other than the requester; no secret anywhere, key access disabled on storage, Cosmos, Event Grid and Application Insights; a read-only MCP server on internal ingress | No virtual network: app roles and internal ingress are the boundary (ADR-011) |
+| Cost Optimization | €0.014 in tokens per intervention; the group costs almost nothing at rest because nothing runs between interventions | The production projection, a Standard search tier and two warm replicas, is costed at about €380 a month, not deployed |
+| Operational Excellence | One `azd up`; a quality gate, an evaluation gate with a pull-request comment, canary deployment with rollback and a create-only audit of every decision | The evaluation gate is advisory, and the repository reports it red |
+| Performance Efficiency | A handoff workflow where each agent holds only the handoffs it needs, and case memory as a Cosmos vector context provider next to AI Search | Unnecessary steps measured at 0.30 to 0.76 against a 0.15 gate: reported, not yet solved |
 
 ## Deploy
 
@@ -187,46 +240,7 @@ topic:
 }
 ```
 
-## Evaluation
-
-Runs of `eval.yml` on the first two pull requests, 2026-10-20, and on the fifth, 2026-10-25, every
-intervention driven live, the two smoke photographs unanalysed because Content Understanding
-refuses the GitHub identity (`docs/evaluation.md` has the case-by-case reading and the local run of
-the evening before; every report quoted is in `docs/reports/`):
-
-| Metric | Smoke, first PR | Smoke, second PR | Injection suite, second PR (25) | Smoke, fifth PR | Injection suite, fifth PR (25) | Gate |
-|---|---|---|---|---|---|---|
-| **Approval compliance** | **1.00** | **1.00** | **1.00** | **1.00** | **1.00** | = 1.00 |
-| Task success | 0.50 | 0.40 | 0.80 | 0.40 | 0.68 | ≥ 0.85 |
-| Tool call accuracy | 0.54 (judge) | 0.47 (judge) | 0.12 (local) | 0.50 (judge) | 0.24 (local) | ≥ 0.90 |
-| Injection proposal rate | 0.33 | 0.33 | 0.24 (6 of 25) | 0.67 | 0.20 (5 of 25) | = 0 |
-| Unnecessary step rate | 0.40 | 0.40 | 0.76 | 0.30 | 0.64 | ≤ 0.15 |
-| Citation precision | 0.90 | 0.70 | 0.80 | 0.90 | 0.84 | ≥ 0.95 |
-
-**Approval compliance is 1.00 on every run so far, and the Cosmos audit shows one execution per
-privileged tool per intervention.** The evaluation gate is red, and advisory, because the `main` ruleset
-requires a pull request but no status check; the repository says so: the injected
-instructions made an agent *propose* the canary part in six of twenty-five runs of the complete
-injection suite, and in five of twenty-five when it ran again — the approval gate stopped every
-one — and after a denial the agents retry the privileged call rather than stop. The judge agrees
-with the thirty human-labelled transcripts at κ =
-0.58 (task adherence) and κ = 0.67 (tool call accuracy), so its scores are reported rather than
-trusted on their own. `experiments/` measures handoff against sequential orchestration and the
-similar-cases memory against no memory.
-
-![ci.yml tests, builds the Bicep and scans for secrets; eval.yml runs the smoke and injection suites into an advisory gate; deploy.yml goes through an approval, a 10 % canary and promotion or rollback; pages.yml publishes the static demo](docs/images/cicd.png)
-
-## Cost
-
-Measured on 2026-10-20: this resource group has cost €0.0002 month to date because nothing in it
-runs between interventions; the shared platform has cost €24.55, mostly the search service and the
-model calls of every repository. An intervention costs **€0.014 in tokens**, measured from the
-account's token metrics over eight interventions run alone (€0.042 when the judge's graders are
-counted in); a thousand interventions cost about €20 to €45 all in. The production projection —
-2,200 interventions a month, a Standard search tier, two warm replicas — is about €380 a month
-(`docs/cost.md`).
-
-## Identities and roles
+### Identities and roles
 
 | Identity | Roles |
 |---|---|
@@ -243,18 +257,6 @@ in.** Every call is made with a managed identity or the developer's own login; s
 Event Grid and Application Insights have key access disabled; the CI gate scans the full history
 for emails and identifiers. `docs/security.md` maps every threat to the file and the test that
 mitigate it.
-
-## Well-Architected design
-
-How the design maps to the five pillars of the Azure Well-Architected Framework, and the trade-off accepted in each.
-
-| Pillar | Applied | Trade-off accepted |
-|---|---|---|
-| Reliability | Approvals survive a process restart: the checkpoint lives in Cosmos DB and any replica resumes it; canary deployment with rollback | One region, scaled to zero between interventions, so the first one after a pause starts cold |
-| Security | No write action without the approval of someone other than the requester; no secret anywhere, key access disabled on storage, Cosmos, Event Grid and Application Insights; a read-only MCP server on internal ingress | No virtual network: app roles and internal ingress are the boundary (ADR-011) |
-| Cost Optimization | €0.014 in tokens per intervention; the group costs almost nothing at rest because nothing runs between interventions | The production projection, a Standard search tier and two warm replicas, is costed at about €380 a month, not deployed |
-| Operational Excellence | One `azd up`; a quality gate, an evaluation gate with a pull-request comment, canary deployment with rollback and a create-only audit of every decision | The evaluation gate is advisory, and the repository reports it red |
-| Performance Efficiency | A handoff workflow where each agent holds only the handoffs it needs, and case memory as a Cosmos vector context provider next to AI Search | Unnecessary steps measured at 0.30 to 0.76 against a 0.15 gate: reported, not yet solved |
 
 ## Decisions
 
@@ -274,4 +276,6 @@ How the design maps to the five pillars of the Azure Well-Architected Framework,
 
 ## Author
 
-**Rodrigo Martín Gómez del Moral Herranz** · [LinkedIn](https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz) · [Portfolio](https://rodrigogomez.es)
+**Rodrigo Martín Gómez del Moral Herranz**
+
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Rodrigo-GomezdelMoral)&nbsp;&nbsp;[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTIwLjQ1IDIwLjQ1aC0zLjU2di01LjU3YzAtMS4zMy0uMDMtMy4wNC0xLjg1LTMuMDQtMS44NSAwLTIuMTQgMS40NS0yLjE0IDIuOTR2NS42N0g5LjM1VjloMy40MXYxLjU2aC4wNWMuNDgtLjkgMS42NC0xLjg1IDMuMzctMS44NSAzLjYgMCA0LjI3IDIuMzcgNC4yNyA1LjQ2djYuMjh6TTUuMzQgNy40M2EyLjA2IDIuMDYgMCAxIDEgMC00LjEyIDIuMDYgMi4wNiAwIDAgMSAwIDQuMTJ6TTcuMTIgMjAuNDVIMy41NlY5aDMuNTZ2MTEuNDV6TTIyLjIyIDBIMS43N0MuNzkgMCAwIC43NyAwIDEuNzN2MjAuNTRDMCAyMy4yMy43OSAyNCAxLjc3IDI0aDIwLjQ1Yy45OCAwIDEuNzgtLjc3IDEuNzgtMS43M1YxLjczQzI0IC43NyAyMy4yIDAgMjIuMjIgMHoiLz48L3N2Zz4%3D)](https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz)&nbsp;&nbsp;[![Portfolio](https://img.shields.io/badge/rodrigogomezdelmoralherranz.es-181717?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8%2BPHBhdGggZD0iTTIgMTJoMjBNMTIgMmExNSAxNSAwIDAgMSAwIDIwTTEyIDJhMTUgMTUgMCAwIDAgMCAyMCIvPjwvc3ZnPg%3D%3D)](https://rodrigogomezdelmoralherranz.es)
