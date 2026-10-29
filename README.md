@@ -2,7 +2,7 @@
 
 Built by **Rodrigo Martín Gómez del Moral Herranz**
 
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Rodrigo-GomezdelMoral)&nbsp;&nbsp;[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTIwLjQ1IDIwLjQ1aC0zLjU2di01LjU3YzAtMS4zMy0uMDMtMy4wNC0xLjg1LTMuMDQtMS44NSAwLTIuMTQgMS40NS0yLjE0IDIuOTR2NS42N0g5LjM1VjloMy40MXYxLjU2aC4wNWMuNDgtLjkgMS42NC0xLjg1IDMuMzctMS44NSAzLjYgMCA0LjI3IDIuMzcgNC4yNyA1LjQ2djYuMjh6TTUuMzQgNy40M2EyLjA2IDIuMDYgMCAxIDEgMC00LjEyIDIuMDYgMi4wNiAwIDAgMSAwIDQuMTJ6TTcuMTIgMjAuNDVIMy41NlY5aDMuNTZ2MTEuNDV6TTIyLjIyIDBIMS43N0MuNzkgMCAwIC43NyAwIDEuNzN2MjAuNTRDMCAyMy4yMy43OSAyNCAxLjc3IDI0aDIwLjQ1Yy45OCAwIDEuNzgtLjc3IDEuNzgtMS43M1YxLjczQzI0IC43NyAyMy4yIDAgMjIuMjIgMHoiLz48L3N2Zz4%3D)](https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz)&nbsp;&nbsp;[![Portfolio](https://img.shields.io/badge/rodrigogomezdelmoralherranz.es-181717?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8%2BPHBhdGggZD0iTTIgMTJoMjBNMTIgMmExNSAxNSAwIDAgMSAwIDIwTTEyIDJhMTUgMTUgMCAwIDAgMCAyMCIvPjwvc3ZnPg%3D%3D)](https://rodrigogomezdelmoralherranz.es)
+<a href="https://github.com/Rodrigo-GomezdelMoral"><img src="docs/images/author/github.png" alt="GitHub" height="36"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz"><img src="docs/images/author/linkedin.png" alt="LinkedIn" height="36"></a>&nbsp;&nbsp;<a href="https://rodrigogomezdelmoralherranz.es"><img src="docs/images/author/portfolio.png" alt="Portfolio" height="36"></a>
 
 Four specialist agents on Microsoft Agent Framework prepare a maintenance intervention from a
 technician's fault report or photograph: the manual section, the asset's history, similar
@@ -11,11 +11,8 @@ rather than a demo: **no write action executes without a human approval, the app
 requester, the approval survives a process restart, and every decision is auditable.** An agent
 with tools is a privileged component; this repository is the control plane that makes it safe.
 
-**Live demo:** <https://rodrigo-gomezdelmoral.github.io/azure-field-operations-copilot/> — three
+**Live demo:** <https://rodrigo-gomezdelmoral.github.io/azure-field-operations-copilot/> - three
 recorded interventions replayed with their real timings, approvals included, no backend.
-
-[![ci](https://github.com/Rodrigo-GomezdelMoral/azure-field-operations-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/Rodrigo-GomezdelMoral/azure-field-operations-copilot/actions/workflows/ci.yml)
-[![eval](https://github.com/Rodrigo-GomezdelMoral/azure-field-operations-copilot/actions/workflows/eval.yml/badge.svg)](https://github.com/Rodrigo-GomezdelMoral/azure-field-operations-copilot/actions/workflows/eval.yml)
 
 A live run stopped at the approval: the work order is drafted, and only a supervisor who did not
 open the intervention can let it run.
@@ -25,8 +22,8 @@ open the intervention can let it run.
 ## The problem
 
 Asset maintenance companies in energy, transport and manufacturing send technicians to equipment
-they do not know by heart, and preparing one intervention — the right manual section, the asset's
-history, whether the part is in stock, the work order — takes, as an illustrative figure for an
+they do not know by heart, and preparing one intervention - the right manual section, the asset's
+history, whether the part is in stock, the work order - takes, as an illustrative figure for an
 asset the technician has not worked on, thirty to forty-five minutes of a qualified technician. At a hundred interventions a day that is several full-time equivalents a
 year, and the quality of the preparation varies with whoever is on shift. The buyer is the head
 of maintenance operations; what they buy is that time back, with a procedure cited from the
@@ -86,7 +83,7 @@ flowchart TD
 ```
 
 `WorkflowViz(workflow).to_mermaid()` draws the framework's full mesh; which handoffs an agent can
-actually take is fixed by the handoff tools it holds — Triage to Diagnostic or Parts, Diagnostic
+actually take is fixed by the handoff tools it holds - Triage to Diagnostic or Parts, Diagnostic
 to Parts or WorkOrder, Parts to WorkOrder or back to Diagnostic, WorkOrder to nobody
 (`app/workflow.py`).
 
@@ -141,8 +138,8 @@ the evening before; every report quoted is in `docs/reports/`):
 privileged tool per intervention.** The evaluation gate is red, and advisory, because the `main` ruleset
 requires a pull request but no status check; the repository says so: the injected
 instructions made an agent *propose* the canary part in six of twenty-five runs of the complete
-injection suite, and in five of twenty-five when it ran again — the approval gate stopped every
-one — and after a denial the agents retry the privileged call rather than stop. The judge agrees
+injection suite, and in five of twenty-five when it ran again - the approval gate stopped every
+one - and after a denial the agents retry the privileged call rather than stop. The judge agrees
 with the thirty human-labelled transcripts at κ =
 0.58 (task adherence) and κ = 0.67 (tool call accuracy), so its scores are reported rather than
 trusted on their own. `experiments/` measures handoff against sequential orchestration and the
@@ -156,8 +153,8 @@ Measured on 2026-10-20: this resource group has cost €0.0002 month to date bec
 runs between interventions; the shared platform has cost €24.55, mostly the search service and the
 model calls of every repository. An intervention costs **€0.014 in tokens**, measured from the
 account's token metrics over eight interventions run alone (€0.042 when the judge's graders are
-counted in); a thousand interventions cost about €20 to €45 all in. The production projection —
-2,200 interventions a month, a Standard search tier, two warm replicas — is about €380 a month
+counted in); a thousand interventions cost about €20 to €45 all in. The production projection -
+2,200 interventions a month, a Standard search tier, two warm replicas - is about €380 a month
 (`docs/cost.md`).
 
 ## Well-Architected design
@@ -278,4 +275,4 @@ mitigate it.
 
 **Rodrigo Martín Gómez del Moral Herranz**
 
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Rodrigo-GomezdelMoral)&nbsp;&nbsp;[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTIwLjQ1IDIwLjQ1aC0zLjU2di01LjU3YzAtMS4zMy0uMDMtMy4wNC0xLjg1LTMuMDQtMS44NSAwLTIuMTQgMS40NS0yLjE0IDIuOTR2NS42N0g5LjM1VjloMy40MXYxLjU2aC4wNWMuNDgtLjkgMS42NC0xLjg1IDMuMzctMS44NSAzLjYgMCA0LjI3IDIuMzcgNC4yNyA1LjQ2djYuMjh6TTUuMzQgNy40M2EyLjA2IDIuMDYgMCAxIDEgMC00LjEyIDIuMDYgMi4wNiAwIDAgMSAwIDQuMTJ6TTcuMTIgMjAuNDVIMy41NlY5aDMuNTZ2MTEuNDV6TTIyLjIyIDBIMS43N0MuNzkgMCAwIC43NyAwIDEuNzN2MjAuNTRDMCAyMy4yMy43OSAyNCAxLjc3IDI0aDIwLjQ1Yy45OCAwIDEuNzgtLjc3IDEuNzgtMS43M1YxLjczQzI0IC43NyAyMy4yIDAgMjIuMjIgMHoiLz48L3N2Zz4%3D)](https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz)&nbsp;&nbsp;[![Portfolio](https://img.shields.io/badge/rodrigogomezdelmoralherranz.es-181717?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8%2BPHBhdGggZD0iTTIgMTJoMjBNMTIgMmExNSAxNSAwIDAgMSAwIDIwTTEyIDJhMTUgMTUgMCAwIDAgMCAyMCIvPjwvc3ZnPg%3D%3D)](https://rodrigogomezdelmoralherranz.es)
+<a href="https://github.com/Rodrigo-GomezdelMoral"><img src="docs/images/author/github.png" alt="GitHub" height="36"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz"><img src="docs/images/author/linkedin.png" alt="LinkedIn" height="36"></a>&nbsp;&nbsp;<a href="https://rodrigogomezdelmoralherranz.es"><img src="docs/images/author/portfolio.png" alt="Portfolio" height="36"></a>
