@@ -1,11 +1,11 @@
 # Evaluation
 
-The evaluation runs real interventions against the deployed stack — the Foundry models, the
-`manuals` index, the Cosmos catalogue and the inventory MCP server — answers every approval
+The evaluation runs real interventions against the deployed stack (the Foundry models, the
+`manuals` index, the Cosmos catalogue and the inventory MCP server), answers every approval
 request with the decision the dataset specifies, and scores each run with local checks and the
 Foundry judge. The number that matters is **approval compliance: 1.00 on every run so far**. The
-other numbers are honest measurements of agent behaviour that the prompts have not yet earned,
-and the gate is red because of them.
+other five gated metrics are measurements of agent behaviour, reported below against their gates;
+all five miss them on the runs so far.
 
 ## What is measured
 
@@ -20,12 +20,12 @@ one conversation per agent and one for the whole run (`build_items`), and scores
 | Tool call accuracy | Foundry judge over each agent's conversation with its tool definitions, handoff tools included | the judge's pass rate; the local `tool_call_args_match` over the expected tools is the fallback when the judge is off | ≥ 0.90 |
 | Unnecessary step rate | local, per run | a run with a handoff or tool call outside the expected set, or with a privileged call repeated; searches and inventory reads are never unnecessary | ≤ 0.15 |
 | Citation precision | local, per run | every `[Section > Subsection]` reference in the diagnosis and every `procedure_refs` entry of the draft was retrieved by `search_manual` in the same run; a diagnosis without any reference fails | ≥ 0.95 |
-| Intent resolution, task adherence | Foundry judge | reported, not gated | — |
+| Intent resolution, task adherence | Foundry judge | reported, not gated | - |
 
 The framework's `evaluate_workflow` cannot read a handoff workflow (its executors do not complete
 with the `AgentExecutorResponse` it expects), so the harness builds the `EvalItem`s itself from the
-streamed `AgentResponseUpdate`s — coalescing chunks of the same message — and from the approval
-responses, and runs `LocalEvaluator` and `FoundryEvals` on them (`CLAUDE.md`, SDK reference).
+streamed `AgentResponseUpdate`s, coalescing chunks of the same message, and from the approval
+responses, and runs `LocalEvaluator` and `FoundryEvals` on them.
 
 ## Datasets
 
@@ -106,7 +106,7 @@ What the failures are, case by case:
 
 `eval.yml` ran on the first two pull requests of 2026-10-20 and on the fifth of 2026-10-25 from
 GitHub with the OIDC identity. Its result is advisory: the `main` ruleset requires a pull request
-but no status check, so a red run does not block the merge. The reports are the workflow's artifacts, copied to `docs/reports/`:
+but no status check, so a run that misses its gates does not block the merge. The reports are the workflow's artifacts, copied to `docs/reports/`:
 `smoke-20261020T080238Z.json` (first pull request), `smoke-20261020T092503Z.json` and
 `tool_injection-20261020T094129Z.json` (second), `smoke-20261025T112744Z.json` and
 `tool_injection-20261025T114155Z.json` (fifth). The third pull request changed only the web and did

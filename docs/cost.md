@@ -1,7 +1,7 @@
 # Cost
 
-Every figure here is either **measured** — read from Azure Cost Management, from the Foundry
-account's token metrics, from the Retail Prices API or from an evaluation report — or **modelled**
+Every figure here is either **measured** (read from Azure Cost Management, from the Foundry
+account's token metrics, from the Retail Prices API or from an evaluation report) or **modelled**
 from a measured unit price and a stated assumption, and each table says which.
 
 ## What the workload costs today (measured)
@@ -21,30 +21,30 @@ to the shared account, which the next section isolates.
 
 The Foundry account's `InputTokens` and `OutputTokens` metrics, by deployment, for the two hours
 on 2026-10-19 (20:00–22:00 UTC) in which the three smoke runs, the calibration run and their
-judges ran — 29 interventions plus about 130 judged items:
+judges ran, 29 interventions plus about 130 judged items:
 
 | Deployment | Input tokens | Output tokens | Retail price (Sweden Central, per million, 2026-10-14) | Cost |
 |---|---|---|---|---|
 | gpt-5-mini (Triage, Diagnostic, WorkOrder, the judge's graders) | 1,914,218 | 444,453 | €0.22 in · €1.76 out | €0.42 + €0.78 = €1.20 |
 | gpt-5-nano (Parts) | 325,035 | 53,735 | €0.044 in · €0.352 out | €0.014 + €0.019 = €0.03 |
-| text-embedding-3-small (similar cases, search vectors) | 3,485 | — | €0.018 | < €0.001 |
+| text-embedding-3-small (similar cases, search vectors) | 3,485 | - | €0.018 | < €0.001 |
 
 That is €1.23 for the two hours, or **at most €0.042 per intervention** if every token were an
 intervention's; the judge's graders read every agent conversation three times, so the agents'
 own share is lower. The experiment windows had no judge and nothing else running, and give the
-clean figure — eight interventions with the similar-cases memory on, 22:14–22:21 UTC the same
+clean figure, eight interventions with the similar-cases memory on, 22:14–22:21 UTC the same
 evening:
 
 | Deployment | Input tokens | Output tokens | Cost for 8 interventions |
 |---|---|---|---|
 | gpt-5-mini | 284,708 | 20,377 | €0.0626 + €0.0359 = €0.099 |
 | gpt-5-nano | 144,934 | 18,288 | €0.0064 + €0.0064 = €0.013 |
-| text-embedding-3-small | 724 | — | < €0.001 |
+| text-embedding-3-small | 724 | - | < €0.001 |
 
 **€0.111 for eight, €0.014 per intervention**, of which the input side is nine tenths: every
 agent re-reads the growing conversation, Diagnostic searches two to four times with six passages
 of up to 1,200 characters each, and Parts reads the inventory three or four times. The
-eight runs without memory (`experiments/002-memory.md`) cost €0.009 each, less because four of
+eight runs without memory ([`experiments/002-memory.md`](../experiments/002-memory.md)) cost €0.009 each, less because four of
 them stopped before reserving anything.
 
 What does **not** cost tokens: approvals (the run is a checkpoint in Cosmos while it waits), the

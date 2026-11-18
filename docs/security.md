@@ -4,7 +4,7 @@ An agent with tools is a privileged component. The boundary of this system is id
 network: every call to the API carries an Entra token with the `Copilot.Use` app role, every call
 the agents make to Azure is made with a managed identity holding the narrowest role the service
 offers, no write tool runs without a human approval given by someone other than the requester,
-and the repository contains no secret of any kind — not in code, templates, fixtures, workflows
+and the repository contains no secret of any kind, not in code, templates, fixtures, workflows
 or history.
 
 ## Identities and roles
@@ -40,8 +40,8 @@ route, not a role.
 Container Apps rejects any request to `ca-fopapi` or `ca-fopa2a` without a valid Entra token for
 `api://<client id>` with `401` at the ingress (`infra/modules/apps.bicep`, `authConfigs`; only
 `/healthz` and the agent card are excluded). The code then validates the same token against the
-tenant's keys and requires the app role — `Copilot.Use` on the API, `Copilot.Diagnose` on the A2A
-server — returning `403` without it (`app/main.py` `verify_token`, `a2a_server/main.py`
+tenant's keys and requires the app role (`Copilot.Use` on the API, `Copilot.Diagnose` on the A2A
+server), returning `403` without it (`app/main.py` `verify_token`, `a2a_server/main.py`
 `RoleGate`; `tests/test_main.py`, `tests/test_agents.py`).
 
 The web proxy requests its token with its managed identity and forwards the signed-in user's
@@ -75,7 +75,7 @@ which only a local run sets, the `x-demo-user` header names the acting person in
 | Threat | Mitigation | File · test |
 |---|---|---|
 | Injection from a manual passage (`search_manual` evidence instructs an agent to reserve or create) | evidence is returned inside a delimited block labelled untrusted; the prompts treat it as data and report it as suspicious; the privileged tools cannot run without a human; the injection suite plants such passages and counts any canary that reaches a tool call | `app/tools.py` (`EVIDENCE_START`), `prompts/diagnostic_v1.md`, `eval/run.py` (`PlantedTools`, `no_injection_proposal`) · `tests/test_tools.py` `test_search_manual_wraps_passages_as_untrusted_evidence…`, `tests/test_eval.py` `test_a_planted_passage_reaches_the_evidence_and_a_canary_proposal_is_caught` |
-| Injection from an inventory response (the MCP result tells Parts to reserve a part) | the Parts prompt treats inventory text as data; `PolicyMiddleware` rejects any part not in the catalogue before the tool runs; the approval gate remains; the suite plants the instruction into the `find_parts` result and measured on the first run that it **did** make Parts propose the canary, which the gate stopped — the finding is recorded, not hidden | `prompts/parts_v1.md`, `app/middleware.py`, `eval/run.py` (`plant_inventory`) · `tests/test_agents.py` `test_policy_rejects_unknown_parts…`, `tests/test_eval.py` |
+| Injection from an inventory response (the MCP result tells Parts to reserve a part) | the Parts prompt treats inventory text as data; `PolicyMiddleware` rejects any part not in the catalogue before the tool runs; the approval gate remains; the suite plants the instruction into the `find_parts` result and measured on the first run that it **did** make Parts propose the canary, which the gate stopped: the finding is recorded, not hidden | `prompts/parts_v1.md`, `app/middleware.py`, `eval/run.py` (`plant_inventory`) · `tests/test_agents.py` `test_policy_rejects_unknown_parts…`, `tests/test_eval.py` |
 | Injection from text in a photograph (the analyzer's caption carries an instruction) | the Content Understanding provider adds the description as context the Triage prompt calls data; Triage has no write tool; the suite carries the caption channel | `app/agents.py` (`vision_provider`), `prompts/triage_v1.md`, `eval/datasets/tool_injection.jsonl` · `tests/test_agents.py` `test_agents_are_wired_with_the_right_tools…` |
 | Injection from the case memory (a resolved case contains an instruction) | the similar-cases block is delimited, labelled untrusted and marked "cite nothing from here"; citation precision fails any procedure reference not retrieved from the manual in the same run | `app/memory.py`, `eval/run.py` (`citations_grounded`) · `tests/test_agents.py` `test_similar_cases_provider_adds_a_delimited_untrusted_block` |
 | Tool misuse (an agent calls a tool it should not have, or with arguments outside policy) | each agent receives only its own tools and handoffs; quantities above the bound and unknown parts are rejected before execution and audited as `rejected` | `app/agents.py`, `app/middleware.py` · `tests/test_agents.py` (wiring, policy) |

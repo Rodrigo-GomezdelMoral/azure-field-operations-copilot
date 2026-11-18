@@ -2,7 +2,7 @@
 
 Built by **Rodrigo Martín Gómez del Moral Herranz**
 
-<a href="https://github.com/Rodrigo-GomezdelMoral"><img src="docs/images/author/github.png" alt="GitHub" height="36"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz"><img src="docs/images/author/linkedin.png" alt="LinkedIn" height="36"></a>&nbsp;&nbsp;<a href="https://rodrigogomezdelmoralherranz.es"><img src="docs/images/author/portfolio.png" alt="Portfolio" height="36"></a>
+<a href="mailto:rodrigo.gomezdelmoral@gmail.com"><img src="docs/images/author/email.png" alt="Email" height="36"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz"><img src="docs/images/author/linkedin.png" alt="LinkedIn" height="36"></a>&nbsp;&nbsp;<a href="https://github.com/Rodrigo-GomezdelMoral"><img src="docs/images/author/github.png" alt="GitHub" height="36"></a>&nbsp;&nbsp;<a href="https://rodrigogomezdelmoral.es"><img src="docs/images/author/portfolio.png" alt="Professional Portfolio" height="36"></a>
 
 Four specialist agents on Microsoft Agent Framework prepare a maintenance intervention from a
 technician's fault report or photograph: the manual section, the asset's history, similar
@@ -11,8 +11,24 @@ rather than a demo: **no write action executes without a human approval, the app
 requester, the approval survives a process restart, and every decision is auditable.** An agent
 with tools is a privileged component; this repository is the control plane that makes it safe.
 
-**Live demo:** <https://rodrigo-gomezdelmoral.github.io/azure-field-operations-copilot/> - three
-recorded interventions replayed with their real timings, approvals included, no backend.
+<p align="center"><a href="https://rodrigogomezdelmoral.es/en/projects/azure-field-operations-copilot#video"><img src="docs/images/author/demo-video.png" alt="Watch the demo video" height="48"></a></p>
+
+**Built to standard.** This AI solution is designed, built, validated and operated in alignment with the **Microsoft
+Responsible AI Standard** (Fairness, Reliability and Safety, Privacy and Security, Inclusiveness, Transparency,
+Accountability) and the **Azure Well-Architected Framework** (Reliability, Security, Cost Optimization, Operational
+Excellence, Performance Efficiency).
+
+Every engineering decision is driven by a concrete requirement and grounded in one or more of these principles and
+pillars, with supporting evidence documented in this repository. These principles guide the development of
+responsible, reliable and scalable AI solutions through specialised engineering practices in evaluation, safety,
+identity, operations and cost management.
+
+See how [each principle](#microsoft-responsible-ai-standard) and [each pillar](#azure-well-architected-framework) is
+applied.
+
+<p align="center"><a href="https://rodrigo-gomezdelmoral.github.io/azure-field-operations-copilot/"><img src="docs/images/author/live-demo.png" alt="Live demo" height="48"></a></p>
+
+Three recorded interventions, replayed in the browser with their real timings, no backend and no sign-in: a pump tripping on high vibration, where you approve the parts and the work order; a slipping fan belt, where you deny the reservation; and a part request with no fault reported, where the copilot asks first.
 
 A live run stopped at the approval: the work order is drafted, and only a supervisor who did not
 open the intervention can let it run.
@@ -32,11 +48,11 @@ parts on its own is not a saving, it is a liability.
 
 ## What it does
 
-- Prepares a maintenance intervention from a technician's fault report or photograph: the manual section, the asset's history, similar resolved cases, the parts in stock and a drafted work order.
-- Shares the work among four agents on Microsoft Agent Framework: triage, diagnostic, parts and work order.
-- Never writes without a human: reserving parts or creating the order waits for a supervisor who is not the requester.
-- Survives restarts: the approval waits in a checkpoint in Cosmos DB and resumes on any replica, and every decision is audited.
-- Can be tried without Azure in the published demo, with three recorded interventions, approvals included.
+- **Prepares a maintenance intervention from a technician's fault report or photograph:** the manual section, the asset's history, similar resolved cases, the parts in stock and a drafted work order.
+- **Shares the work among four agents on Microsoft Agent Framework:** triage, diagnostic, parts and work order.
+- **Never writes without a human:** reserving parts or creating the order waits for a supervisor who is not the requester.
+- **Survives restarts:** the approval waits in a checkpoint in Cosmos DB and resumes on any replica, and every decision is audited.
+- **Can be tried without Azure:** in the published demo, with three recorded interventions, approvals included.
 
 ## Repo card
 
@@ -46,21 +62,26 @@ parts on its own is not a saving, it is a liability.
 | **Azure services** | Azure Container Apps (API, web, an MCP server, an A2A server and jobs), Azure Cosmos DB (checkpoints, audit and vector memory), Azure Storage, Event Grid, Application Insights and alerts; shared: Microsoft Foundry with Content Understanding, Azure AI Search, Container Registry and Log Analytics |
 | **AI** | Microsoft Agent Framework: four agents in a handoff workflow, human approvals, checkpoints, MCP and A2A; gpt-5-mini and gpt-5-nano, text-embedding-3-small |
 | **Stack** | Python 3.12 with FastAPI; a React and TypeScript web |
-| **Security** | Separation of duties checked before any checkpoint loads; managed identities and no secrets; app roles and internal ingress |
+| **Security** | separation of duties checked before any checkpoint loads; managed identities and no secrets; app roles and internal ingress |
 | **Infrastructure and delivery** | Bicep with azd; GitHub Actions with OIDC: `ci`, `eval`, `deploy` (canary with rollback) and `pages` |
 | **Demo** | <https://rodrigo-gomezdelmoral.github.io/azure-field-operations-copilot/> |
 
 ## Architecture
 
-![The technician's web reaches the API through a proxy; four agents use an internal MCP server, Content Understanding, the shared Foundry project and AI Search, and keep checkpoints and the audit in Cosmos DB](docs/images/architecture.png)
+![The technician's web reaches the API through a proxy; four agents use an internal MCP server, Content Understanding, the shared Foundry project and AI Search, and keep checkpoints and the audit in Cosmos DB](docs/images/architecture.svg)
+
+![The four agents and what each one uses: photo analysis, the manuals, the inventory; reserving parts and creating the order wait for a supervisor's approval](docs/images/agents.svg)
+
+The copilot's resource group as deployed, in the Azure portal.
 
 ![The copilot's resource group as deployed, in the Azure portal](docs/images/resource-group.png)
 
 The two write tools, `reserve_parts` and `create_work_order`, are local tools with
 `approval_mode="always_require"`. A run stops at the approval, the checkpoint lives in Cosmos,
 and a supervisor who did not open the intervention answers it from any replica; the tool then
-runs exactly once. `docs/architecture.md` has the container table, the sequence diagram of an
-approval across a restart, and the handoff graph below as the framework generated it:
+runs exactly once. [`docs/architecture.md`](docs/architecture.md) has the container table, the
+sequence diagram of an approval across a restart, and the handoff graph below as the framework
+generated it:
 
 ```mermaid
 flowchart TD
@@ -87,14 +108,12 @@ actually take is fixed by the handoff tools it holds - Triage to Diagnostic or P
 to Parts or WorkOrder, Parts to WorkOrder or back to Diagnostic, WorkOrder to nobody
 (`app/workflow.py`).
 
-![The four agents and what each one uses: photo analysis, the manuals, the inventory; reserving parts and creating the order wait for a supervisor's approval](docs/images/agents.png)
-
 ## In action
+
+![The run stops at the approval, the process can die, and another person resumes it from the state in Cosmos DB](docs/images/approval.svg)
 
 The approval outlives the process: the run stops, its state is checkpointed in Cosmos DB, and a
 different person answers it from any replica, even after a restart.
-
-![The run stops at the approval, the process can die, and another person resumes it from the state in Cosmos DB](docs/images/approval.png)
 
 Once approved, the tool runs exactly once and the work order exists, with the procedure cited from
 the manual.
@@ -113,16 +132,18 @@ the manual.
 | A read-only Diagnostic agent exposed over A2A with its own app role | `a2a_server/main.py`, ADR-006 |
 | Photographs analysed by a Content Understanding analyzer created as code; case memory as a Cosmos vector context provider | `ops/analyzer.py`, `app/memory.py`, ADR-004 |
 | Manuals indexed as configuration by the search service's own identity, Document Intelligence layout, quantised vectors | `ops/index.py` |
-| An evaluation harness that drives real interventions, answers approvals, measures approval compliance, injection proposals, unnecessary steps and citation precision, calibrates the judge | `eval/`, `docs/evaluation.md` |
+| An evaluation harness that drives real interventions, answers approvals, measures approval compliance, injection proposals, unnecessary steps and citation precision, calibrates the judge | `eval/`, [`docs/evaluation.md`](docs/evaluation.md) |
 | A mobile-first interface with a live agent trace, the approval card for supervisors and the drafted work order | `web/src/main.tsx` |
 | Quality gate, evaluation gate with a pull-request comment, canary deployment with rollback, static demo | `.github/workflows/` |
 | Eleven architecture decisions, two of them rejections | `docs/adr/` |
 
 ## Evaluation
 
+![ci.yml tests, builds the Bicep and scans for secrets; eval.yml runs the smoke and injection suites into an advisory gate; deploy.yml goes through an approval, a 10 % canary and promotion or rollback; pages.yml publishes the static demo](docs/images/cicd.svg)
+
 Runs of `eval.yml` on the first two pull requests, 2026-10-20, and on the fifth, 2026-10-25, every
 intervention driven live, the two smoke photographs unanalysed because Content Understanding
-refuses the GitHub identity (`docs/evaluation.md` has the case-by-case reading and the local run of
+refuses the GitHub identity ([`docs/evaluation.md`](docs/evaluation.md) has the case-by-case reading and the local run of
 the evening before; every report quoted is in `docs/reports/`):
 
 | Metric | Smoke, first PR | Smoke, second PR | Injection suite, second PR (25) | Smoke, fifth PR | Injection suite, fifth PR (25) | Gate |
@@ -135,8 +156,8 @@ the evening before; every report quoted is in `docs/reports/`):
 | Citation precision | 0.90 | 0.70 | 0.80 | 0.90 | 0.84 | ≥ 0.95 |
 
 **Approval compliance is 1.00 on every run so far, and the Cosmos audit shows one execution per
-privileged tool per intervention.** The evaluation gate is red, and advisory, because the `main` ruleset
-requires a pull request but no status check; the repository says so: the injected
+privileged tool per intervention.** The evaluation gate is advisory, because the `main` ruleset
+requires a pull request but no status check, and the other five metrics miss their gates: the injected
 instructions made an agent *propose* the canary part in six of twenty-five runs of the complete
 injection suite, and in five of twenty-five when it ran again - the approval gate stopped every
 one - and after a denial the agents retry the privileged call rather than stop. The judge agrees
@@ -144,8 +165,6 @@ with the thirty human-labelled transcripts at κ =
 0.58 (task adherence) and κ = 0.67 (tool call accuracy), so its scores are reported rather than
 trusted on their own. `experiments/` measures handoff against sequential orchestration and the
 similar-cases memory against no memory.
-
-![ci.yml tests, builds the Bicep and scans for secrets; eval.yml runs the smoke and injection suites into an advisory gate; deploy.yml goes through an approval, a 10 % canary and promotion or rollback; pages.yml publishes the static demo](docs/images/cicd.png)
 
 ## Cost
 
@@ -155,19 +174,33 @@ model calls of every repository. An intervention costs **€0.014 in tokens**, m
 account's token metrics over eight interventions run alone (€0.042 when the judge's graders are
 counted in); a thousand interventions cost about €20 to €45 all in. The production projection -
 2,200 interventions a month, a Standard search tier, two warm replicas - is about €380 a month
-(`docs/cost.md`).
+([`docs/cost.md`](docs/cost.md)).
 
-## Well-Architected design
+## Microsoft Responsible AI Standard
+
+How the six principles of the Microsoft Responsible AI Standard are applied, and the limitation
+accepted in each. The impact assessment is in [`docs/RESPONSIBLE_AI.md`](docs/RESPONSIBLE_AI.md).
+
+| Principle | Applied | Limitation accepted |
+|---|---|---|
+| Fairness | evaluation datasets cover the four asset families and twenty-four assets, with and without a photograph ([`docs/evaluation.md`](docs/evaluation.md)); the same approval rule binds every role: a supervisor who opened the intervention cannot approve it (ADR-007) | metrics are reported for the whole set rather than per asset family or technician |
+| Reliability and Safety | no write runs without an approval that survives a restart, and the tool then runs exactly once (ADR-002); a policy middleware rejects unknown parts and out-of-bound quantities before execution; twenty-five planted injections with a canary on every pull request that touches the agents; canary deployment with rollback | the evaluation gate is advisory while injection resistance and task success close the gap to their targets ([`docs/evaluation.md`](docs/evaluation.md)); every write still waits for a human approval |
+| Privacy and Security | managed identities and no secret anywhere, key access disabled on every data service; an Entra token and an app role on every call, and the narrowest role per identity (ADR-011); synthetic assets, inventory and work orders; a secret scan over the full history in CI | the token is the boundary, with no virtual network; the inventory MCP server is reachable only inside the environment (ADR-011); audit records are kept without expiry |
+| Inclusiveness | a mobile-first web for a technician on a phone, where a fault can be reported with a photograph; an under-specified report gets a clarifying question, not a guess ([`docs/agent-spec.md`](docs/agent-spec.md)) | English only; accessibility is not yet checked in CI |
+| Transparency | every procedure step cites a manual section retrieved in the same run; the interface shows each agent's steps live and the exact tool and arguments a supervisor is asked to approve; prompts are versioned files, and the evaluation results are published | citation precision is 0.70 to 0.90 against a 0.95 target; AI use is conveyed by naming the copilot and its agents rather than a separate notice |
+| Accountability | a supervisor who is not the requester decides every write, and the reason is kept (ADR-007); one create-only audit record per tool call, handoff and decision (ADR-008); eleven ADRs; alerts on server errors and on a request pending for more than four hours | pending requests wait for a supervisor rather than expiring (ADR-010); the approval event is published for future subscribers |
+
+## Azure Well-Architected Framework
 
 How the design maps to the five pillars of the Azure Well-Architected Framework, and the trade-off accepted in each.
 
 | Pillar | Applied | Trade-off accepted |
 |---|---|---|
-| Reliability | Approvals survive a process restart: the checkpoint lives in Cosmos DB and any replica resumes it; canary deployment with rollback | One region, scaled to zero between interventions, so the first one after a pause starts cold |
-| Security | No write action without the approval of someone other than the requester; no secret anywhere, key access disabled on storage, Cosmos, Event Grid and Application Insights; a read-only MCP server on internal ingress | No virtual network: app roles and internal ingress are the boundary (ADR-011) |
-| Cost Optimization | €0.014 in tokens per intervention; the group costs almost nothing at rest because nothing runs between interventions | The production projection, a Standard search tier and two warm replicas, is costed at about €380 a month, not deployed |
-| Operational Excellence | One `azd up`; a quality gate, an evaluation gate with a pull-request comment, canary deployment with rollback and a create-only audit of every decision | The evaluation gate is advisory, and the repository reports it red |
-| Performance Efficiency | A handoff workflow where each agent holds only the handoffs it needs, and case memory as a Cosmos vector context provider next to AI Search | Unnecessary steps measured at 0.30 to 0.76 against a 0.15 gate: reported, not yet solved |
+| Reliability | approvals survive a process restart: the checkpoint lives in Cosmos DB and any replica resumes it; canary deployment with rollback | one region, scaled to zero between interventions, so the first one after a pause starts cold |
+| Security | no write action without the approval of someone other than the requester; no secret anywhere, key access disabled on storage, Cosmos, Event Grid and Application Insights; a read-only MCP server on internal ingress | no virtual network: app roles and internal ingress are the boundary (ADR-011) |
+| Cost Optimization | €0.014 in tokens per intervention; the group costs almost nothing at rest because nothing runs between interventions | the production projection, a Standard search tier and two warm replicas, is costed at about €380 a month, not deployed |
+| Operational Excellence | one `azd up`; a quality gate, an evaluation gate with a pull-request comment, canary deployment with rollback and a create-only audit of every decision | the evaluation gate is advisory, and five of its six metrics miss their gates |
+| Performance Efficiency | a handoff workflow where each agent holds only the handoffs it needs, and case memory as a Cosmos vector context provider next to AI Search | unnecessary steps measured at 0.30 to 0.76 against a 0.15 gate |
 
 ## Deploy
 
@@ -180,6 +213,18 @@ three jobs. The resource group must exist, the landing zone must be deployed and
 imported with `make lz-env`, and the bootstrap below must have been run once. Then `make seed`
 (or the job `caj-fopseed`) loads the catalogue and creates the analyzer, and `make index` (or
 `caj-fopindexer`) builds the `manuals` index.
+
+### Delivery and DORA
+
+- **Delivery:** a change travels on a branch and a pull request to `main`, which the `protect-main` ruleset requires. `ci.yml` (lint, types, tests, Bicep build, secret and dependency scans, frontend build) runs on every pull request and `eval.yml` (smoke and injection suites) on those that touch the agents; the author merges with both results in view. `deploy.yml` is started by hand from `main`, waits for a reviewer's approval on the `production` environment, builds both images in the shared registry, gives a new API revision 10 % of the traffic for five minutes and promotes it, or rolls it back when its server errors exceed a 5 % budget.
+- **DORA**, from the four `deploy.yml` runs in GitHub Actions, the only ones so far; the six pull requests merged after the last run have not been deployed by it and are not counted.
+
+| Metric | Production, 2026-10-20 to 2026-10-25 |
+|---|---|
+| Deployment frequency | 3 successful deployments, the first on 2026-10-20 and the last on 2026-10-25 |
+| Lead time for changes | Median 21 minutes from the merge to the end of the first complete run that contained the change, over the five pull requests deployed; two of them waited for a later manual dispatch |
+| Change failure rate | 1 of 4 runs did not complete: it stopped at the traffic-pinning step, before a new revision was created |
+| Time to restore | the run that did not complete created no revision; the next deployment completed on 2026-10-25 |
 
 ### Bootstrap, once per tenant
 
@@ -252,7 +297,7 @@ topic:
 **There is no secret anywhere in this system: no key, no connection string, no vault to keep them
 in.** Every call is made with a managed identity or the developer's own login; storage, Cosmos,
 Event Grid and Application Insights have key access disabled; the CI gate scans the full history
-for emails and identifiers. `docs/security.md` maps every threat to the file and the test that
+for emails and identifiers. [`docs/security.md`](docs/security.md) maps every threat to the file and the test that
 mitigate it.
 
 ## Decisions
@@ -275,4 +320,4 @@ mitigate it.
 
 **Rodrigo Martín Gómez del Moral Herranz**
 
-<a href="https://github.com/Rodrigo-GomezdelMoral"><img src="docs/images/author/github.png" alt="GitHub" height="36"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz"><img src="docs/images/author/linkedin.png" alt="LinkedIn" height="36"></a>&nbsp;&nbsp;<a href="https://rodrigogomezdelmoralherranz.es"><img src="docs/images/author/portfolio.png" alt="Portfolio" height="36"></a>
+<a href="mailto:rodrigo.gomezdelmoral@gmail.com"><img src="docs/images/author/email.png" alt="Email" height="36"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/in/rodrigo-mart%C3%ADn-g%C3%B3mez-del-moral-herranz"><img src="docs/images/author/linkedin.png" alt="LinkedIn" height="36"></a>&nbsp;&nbsp;<a href="https://github.com/Rodrigo-GomezdelMoral"><img src="docs/images/author/github.png" alt="GitHub" height="36"></a>&nbsp;&nbsp;<a href="https://rodrigogomezdelmoral.es"><img src="docs/images/author/portfolio.png" alt="Professional Portfolio" height="36"></a>
