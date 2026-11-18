@@ -11,7 +11,7 @@ rather than a demo: **no write action executes without a human approval, the app
 requester, the approval survives a process restart, and every decision is auditable.** An agent
 with tools is a privileged component; this repository is the control plane that makes it safe.
 
-<p align="center"><a href="https://rodrigogomezdelmoral.es/en/projects/azure-field-operations-copilot#video"><img src="docs/images/author/demo-video.png" alt="Watch the demo video" height="48"></a></p>
+<p align="center"><a href="https://rodrigogomezdelmoral.es/en/projects/azure-field-operations-copilot#video"><img src="docs/images/author/demo-video.png" alt="Watch the AI solution video" height="48"></a></p>
 
 **Built to standard.** This AI solution is designed, built, validated and operated in alignment with the **Microsoft
 Responsible AI Standard** (Fairness, Reliability and Safety, Privacy and Security, Inclusiveness, Transparency,
