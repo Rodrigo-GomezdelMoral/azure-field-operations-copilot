@@ -26,7 +26,7 @@ request on the intervention, publishes `FieldOps.ApprovalRequested` to the Event
 the stream, and the process may exit. The checkpoint, including the pending request, is already
 in Cosmos. Later, from any instance, `POST /v1/interventions/{id}/responses` authorises the caller,
 loads the latest checkpoint for the workflow name, rebuilds the workflow from the same code and
-calls `workflow.run(checkpoint_id=..., responses={request_id: ...})` — resume and answer in one
+calls `workflow.run(checkpoint_id=..., responses={request_id: ...})`: resume and answer in one
 call. The approval response is reconstructed from the request payload the API stored, so no
 in-memory object survives between the two requests.
 

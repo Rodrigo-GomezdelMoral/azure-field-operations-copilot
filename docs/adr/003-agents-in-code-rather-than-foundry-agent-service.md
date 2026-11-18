@@ -21,8 +21,8 @@ through a checkpoint this repository owns.
 
 The four agents are **code**: `app/agents.py` builds them from `prompts/*.md`, `app/tools.py`,
 `app/memory.py` and `app/middleware.py`, once per intervention, inside the API process. The
-Foundry project is used for what only it can do — model deployments, the content filter, the
-evaluation service and the Content Understanding analyzer — and not as the registry of what the
+Foundry project is used for what only it can do (model deployments, the content filter, the
+evaluation service and the Content Understanding analyzer) and not as the registry of what the
 agents are.
 
 ## Why
@@ -35,8 +35,8 @@ agents are.
 - **The prompt is a versioned file.** `prompts/diagnostic_v1.md` is reviewed in a pull request,
   diffed, and evaluated against a dated report. A hosted agent's instructions are a field in a
   portal or an API call; the version is whatever was last written.
-- **The workflow owns the state.** `HandoffBuilder` checkpoints the whole orchestration — which
-  specialist is active, the pending approval, the conversation — into Cosmos under
+- **The workflow owns the state.** `HandoffBuilder` checkpoints the whole orchestration (which
+  specialist is active, the pending approval, the conversation) into Cosmos under
   `/workflow_name`. Hosted threads would hold a second copy of part of that state in the service,
   with a second lifecycle and a second deletion path.
 - **Nothing is lost.** Tracing, token usage and evaluations arrive from the framework and from

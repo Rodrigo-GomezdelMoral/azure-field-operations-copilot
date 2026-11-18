@@ -18,7 +18,7 @@ be edited, and a tool that fails before its last line writes nothing.
 ## Decision
 
 `AuditMiddleware` (`app/middleware.py`) is a `FunctionMiddleware` attached to **all four agents**.
-For every function invocation — tool or handoff — it lets the call proceed and then writes one
+For every function invocation, tool or handoff, it lets the call proceed and then writes one
 `AuditEvent` with the agent, the tool name, the arguments, the intervention and actor taken from
 the invocation kwargs, and the outcome: `executed`, or `rejected` when `PolicyMiddleware` stopped
 the call. The record is written with **`create_item`**, never `upsert_item` or `replace_item`;
@@ -44,7 +44,7 @@ execution, sets `context.result` to the violation and returns without calling `c
 ## Consequences
 
 - The audit write adds a Cosmos call per tool invocation. For a workflow with a dozen calls that
-  is a dozen small writes, well inside serverless pricing (`docs/cost.md`).
+  is a dozen small writes, well inside serverless pricing ([`docs/cost.md`](../cost.md)).
 - If the audit write fails, the tool result is still returned to the agent; the failure surfaces
   in telemetry rather than blocking the technician. An enterprise that needs the opposite trade
   swaps the order of the two statements in `process`.

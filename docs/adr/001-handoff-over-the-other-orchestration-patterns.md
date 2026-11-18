@@ -21,7 +21,7 @@ framework generates on each source agent.
 | Triage (start) | Diagnostic, Parts |
 | Diagnostic | Parts, WorkOrder |
 | Parts | WorkOrder, Diagnostic |
-| WorkOrder | — |
+| WorkOrder | - |
 
 The workflow terminates when WorkOrder confirms a created work order. Any other final response
 without a handoff is a question to the technician, which the framework surfaces as a
@@ -47,7 +47,7 @@ without a handoff is a question to the technician, which the framework surfaces 
 ## Consequences
 
 - The handoff graph is data in one function; `WorkflowViz(workflow).to_mermaid()` renders it in
-  `docs/architecture.md`, so the documentation cannot drift from the code.
+  [`docs/architecture.md`](../architecture.md), so the documentation cannot drift from the code.
 - Each handoff is a function call and is therefore audited by `AuditMiddleware` like any tool
   (ADR-008).
 - The termination condition is a predicate over the conversation, not a flag in a tool: it is

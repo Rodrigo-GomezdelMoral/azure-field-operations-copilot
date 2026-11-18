@@ -37,8 +37,8 @@ graph LR
 | `caj-fopseed`, `caj-fopindexer`, `caj-fopeval` | `ops.seed`, `ops.index`, `eval.run --suite full` (Mondays 06:00 UTC) | `id-fopjobs` | the `manuals` container (blob contributor), the search service (contributor), Cosmos (data contributor), the project |
 | shared search service | indexer, skillset, index projection | its own system identity | the `manuals` container (blob reader), the embedding deployment through the Foundry account |
 
-Everything shared — the Foundry account and project, the model deployments, the search service,
-the container registry, Log Analytics, the action group — is created by `azure-ai-landing-zone` and
+Everything shared (the Foundry account and project, the model deployments, the search service,
+the container registry, Log Analytics, the action group) is created by the shared platform and
 referenced through the `landingZone` parameter. This repository creates its own resource group's
 resources only: five identities, storage, Cosmos, Event Grid, Application Insights, the Container
 Apps environment, four apps, three jobs, two alerts, a budget, and every role assignment,
@@ -79,8 +79,8 @@ reads from the built workflow):
 |---|---|---|---|---|
 | Triage (start) | gpt-5-mini | `handoff_to_Diagnostic`, `handoff_to_Parts` | `asset_history` | Content Understanding (`damageTriageV1`) |
 | Diagnostic | gpt-5-mini | `handoff_to_Parts`, `handoff_to_WorkOrder` | `search_manual` | similar resolved cases (Cosmos vector search) |
-| Parts | gpt-5-nano | `handoff_to_WorkOrder`, `handoff_to_Diagnostic` | `find_parts`, `part_stock` (MCP, read-only), `reserve_parts` (approval) | — |
-| WorkOrder | gpt-5-mini | none; the run ends when its message carries the work-order number | `create_work_order` (approval) | — |
+| Parts | gpt-5-nano | `handoff_to_WorkOrder`, `handoff_to_Diagnostic` | `find_parts`, `part_stock` (MCP, read-only), `reserve_parts` (approval) | - |
+| WorkOrder | gpt-5-mini | none; the run ends when its message carries the work-order number | `create_work_order` (approval) | - |
 
 Every agent carries the same two middlewares: `AuditMiddleware` (one `create_item` per tool call
 and handoff) and `PolicyMiddleware` (catalogue and quantity bound before `reserve_parts` runs).
@@ -110,7 +110,7 @@ sequenceDiagram
     S->>W: POST /v1/interventions/{id}/responses {request_id, approved: true, reason}
     W->>A2: same + Bearer + forwarded user (supervisor role)
     A2->>C: read intervention
-    A2->>A2: authorise(): supervisor role, and oid ≠ technician_id — before any checkpoint is read
+    A2->>A2: authorise(): supervisor role, and oid ≠ technician_id, before any checkpoint is read
     A2->>C: audit {outcome: approved, actor: supervisor}
     A2->>C: list_checkpoints(workflow_name = intervention id) → newest with a pending request
     A2->>A2: workflow.run(responses={request_id: approval}, checkpoint_id, checkpoint_storage)

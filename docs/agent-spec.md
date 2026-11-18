@@ -1,15 +1,15 @@
-# Agent specification — Industrial Field Operations Copilot
+# Agent specification: Industrial Field Operations Copilot
 
 This document is written before any code and governs it. It follows the five sections of the
 Microsoft GenAIOps agent specification: user intent, suggested prompts, capabilities and
 restrictions, evaluation rubric, test data. The rubric here is the rubric the evaluation runs; if
-the two drift, the code is wrong. Where this document and `docs/security.md` describe the same
+the two drift, the code is wrong. Where this document and [`docs/security.md`](security.md) describe the same
 boundary, this one says what the agents may do and that one says what stops them.
 
 ## 1. User intent
 
-**Who.** A field technician standing in front of a piece of equipment they do not know by heart —
-a pump, a fan, a variable-frequency drive, a conveyor — and the supervisor on shift who answers for
+**Who.** A field technician standing in front of a piece of equipment they do not know by heart
+(a pump, a fan, a variable-frequency drive, a conveyor) and the supervisor on shift who answers for
 what gets reserved and ordered. Both are on a phone or a tablet, often with one hand.
 
 **What they ask.** What is wrong with this asset given these symptoms or this photograph, what the

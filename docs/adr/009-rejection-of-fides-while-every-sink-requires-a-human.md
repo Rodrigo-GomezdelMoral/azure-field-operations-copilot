@@ -8,8 +8,8 @@ FIDES is the information-flow control model for agent systems that Microsoft Age
 exposes as an experimental feature: every piece of data an agent reads carries a label (its
 source and trust level), the labels propagate through the conversation, and a policy decides
 whether a tool call whose arguments carry a low-trust label may reach a sensitive sink. It is the
-principled answer to the central threat of this repository — a manual passage, an inventory
-response or the text in a photograph instructing an agent to reserve parts or create an order —
+principled answer to the central threat of this repository (a manual passage, an inventory
+response or the text in a photograph instructing an agent to reserve parts or create an order),
 and the question is whether to adopt it.
 
 ## Decision
@@ -34,10 +34,10 @@ Not now. Three reasons, in order of weight:
   the approver is not the requester, the approval survives a restart.
 - The injection suite keeps measuring what the gate would otherwise hide: on the first smoke run,
   the inventory-channel injection did make the Parts agent *propose* the canary, and the approval
-  gate was the only thing between that proposal and a reservation (`docs/evaluation.md`).
+  gate was the only thing between that proposal and a reservation ([`docs/evaluation.md`](../evaluation.md)).
 
 ## Revisit when
 
-A write must run **unattended** — a reservation below a value threshold, a work order for a
-recurring fault — so that the human leaves the loop for some sink. At that point the label
+A write must run **unattended** (a reservation below a value threshold, a work order for a
+recurring fault), so that the human leaves the loop for some sink. At that point the label
 propagation is what makes an unattended sink defensible, and this ADR is superseded.
